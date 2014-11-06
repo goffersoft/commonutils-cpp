@@ -6,6 +6,10 @@
 
 using std::string;
 
+namespace com {
+namespace goffersoft {
+namespace core {
+
 class Object {
 
     protected :
@@ -81,5 +85,9 @@ class Object {
             return (lhs.cmp(rhs) < 0);
         }
 };
+
+} /* com */
+} /* goffersoft */
+} /* core */
 
 #endif /* __OBJECT_H__ */

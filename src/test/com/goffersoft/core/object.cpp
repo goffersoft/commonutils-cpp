@@ -3,6 +3,7 @@
 
 using std::endl;
 using std::cout;
+using com::goffersoft::core::Object;
 
 class A : public Object {
     private :
