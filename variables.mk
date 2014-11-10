@@ -3,7 +3,7 @@ export EXEDIRNAME=bin
 export OBJDIRNAME=obj
 export LIBDIRNAME=lib
 export INCLUDEDIRNAME=inc
-export APPCCBASEDIR=/Users/peaswar/Documents/cc/commonutils-cpp
+export APPCCBASEDIR=/Users/peaswar/Documents/github/commonutils-cpp
 
 export LIBTYPE := AR
 #export LIBTYPE := SO
@@ -39,6 +39,7 @@ export MKDIR=@mkdir -p
 export CC=gcc
 export INCFLAGS= -I$(INCDIR) \
 		 -I$(SRCDIR)/com/goffersoft/core/ \
+		 -I$(SRCDIR)/com/goffersoft/apps/bio \
 
 export SOCFLAGS = -fPIC -Wall $(INCFLAGS)
 export SOCPPFLAGS = -fPIC -Wall $(INCFLAGS)
@@ -55,10 +56,10 @@ export CFLAGS := $(SOCFLAGS) $(PLATFORM_OS) $(DEBUG_FLAGS)
 export CPPFLAGS := $(SOCPPFLAGS) $(PLATFORM_OS) $(DEBUG_FLAGS)
 endif
 
-export CPPSRCS := $(wildcard *.cpp)
+export CPPSRCS := $(wildcard *.cc)
 export CSRCS := $(wildcard *.c)
 export SRCS := $(SRCS) $(CPPSRCS)
-export CPPOBJS := $(CPPSRCS:.cpp=.o)
+export CPPOBJS := $(CPPSRCS:.cc=.o)
 export COBJS := $(CSRCS:.c=.o)
 export OBJS := $(addprefix $(OBJDIR)/, $(CPPOBJS) $(COBJS))
 

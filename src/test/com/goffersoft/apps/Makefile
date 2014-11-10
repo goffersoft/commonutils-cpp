@@ -1,4 +1,4 @@
-export SUBDIRS = test com
+export SUBDIRS = bio
 
 include $(BASEDIR)/variables.mk
 include $(BASEDIR)/global.mk

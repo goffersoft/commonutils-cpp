@@ -85,7 +85,7 @@ class C : public Object {
 };
 
 
-int main (int argc, char **argv) {
+int test_object_main (int argc, char **argv) {
     A a1(1);
     A a2(2);
     B b1(1);
@@ -102,4 +102,6 @@ int main (int argc, char **argv) {
     cout << string(*obj3) << " " << (*obj1 == *obj4) << endl;
     cout << string(*obj4) << " " << (*obj3 == *obj1) << endl;
     cout << string(*obj5) << " " << (*obj5 == *obj1) << endl;
+
+    return 0;
 }

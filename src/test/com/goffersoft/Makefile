@@ -1,4 +1,4 @@
-export SUBDIRS = core
+export SUBDIRS = core apps
 
 include $(BASEDIR)/variables.mk
 include $(BASEDIR)/global.mk

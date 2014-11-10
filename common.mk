@@ -30,7 +30,7 @@ $(LIBDIR):
 #   fmt -1: list words one per line
 #   sed:    strip leading spaces
 #   sed:    add trailingcolons
-$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: %.cc
 	$(CC) -c $(CPPFLAGS) $(CPPEXTRAFLAGS) $< -o $@
 	@$(CC) -MM $(CPPFLAGS) $(CPPEXTRAFLAGS) $< > $(OBJDIR)/$*.d
 	@mv -f $(OBJDIR)/$*.d $(OBJDIR)/$*.d.tmp
