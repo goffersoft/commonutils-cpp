@@ -19,7 +19,7 @@ export EXEDIR=$(BASEDIR)/$(EXEDIRNAME)
 export OBJDIR := $(subst $(SRCDIRNAME),$(OBJDIRNAME),$(shell pwd))
 export LIBDIR := $(BASEDIR)/$(LIBDIRNAME)
 
-export LIBNAME := $(subst /, ,$(shell pwd))
+export LIBNAME := $(subst /,_,$(shell pwd))
 export LIBNAME := $(lastword $(LIBNAME))
 export LIBNAME := $(addprefix lib,$(LIBNAME))
 export LIBNAME := $(LIBNAME)
