@@ -41,9 +41,18 @@ class BioUtils {
 
     static string reverse_compliment(const string& str);
     static string compliment(const string& str);
+
+    //In information theory, the Hamming distance between 
+    //two strings of equal length is the number of positions 
+    //at which the corresponding symbols are different. 
+    //In another way, it measures the minimum number of 
+    //substitutions required to change one string into 
+    //the other, or the minimum number of errors that could 
+    //have transformed one string into the other.
     static unsigned hamming_distance(const string& str1,
                             const string& str2,
                             unsigned length = 0);
+    static string skew_graph(const string& str, unsigned length = 0);
 
   private :
     static int is_alphabet(char alpha);

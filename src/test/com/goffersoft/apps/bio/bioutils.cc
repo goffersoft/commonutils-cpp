@@ -35,5 +35,7 @@ int test_bioutils_main (int argc, char **argv) {
           "CAGAAAGGAAGGTCCCCATACACCGACGCACCAGTTTA",
           "CACGCCGTATGCATAAACGAGCCGCACGAACCAGAGAG", 0) <<endl;
 
+  cout << "skew graph of CATTCCAGTACTTCATGATGGCGTGAAGA : " << endl;
+  cout << BioUtils::skew_graph("CATTCCAGTACTTCATGATGGCGTGAAGA")<<endl;
   return 0;
 }
