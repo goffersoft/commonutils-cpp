@@ -13,7 +13,12 @@ LDFLAGS := -L$(LIBDIR)
 
 all: $(LIBS) $(EXE)
 
+ifeq "$(PLATFORM_OS)" "__OS_LINUX__"
+$(EXE) : $(LIBS)	
+	$(CC) $(LDFLAGS) -Wl,--start-group $(LOCALLIBS) -Wl,--end-group $(STDLIBS) -o $@
+else
 $(EXE) : $(LIBS)
 	$(CC) $(LDFLAGS) $(LOCALLIBS) $(STDLIBS) -o $@
+endif
 
 -include $(BASEDIR)/clean.mk

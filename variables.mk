@@ -3,7 +3,7 @@ export EXEDIRNAME=bin
 export OBJDIRNAME=obj
 export LIBDIRNAME=lib
 export INCLUDEDIRNAME=inc
-export APPCCBASEDIR=/Users/peaswar/Documents/github/commonutils-cpp
+export APPCCBASEDIR=/home/adminuser/github/commonutils-cpp
 
 export LIBTYPE := AR
 #export LIBTYPE := SO
@@ -45,15 +45,16 @@ export SOCFLAGS = -fPIC -Wall $(INCFLAGS)
 export SOCPPFLAGS = -fPIC -Wall $(INCFLAGS)
 export ARCFLAGS = -Wall $(INCFLAGS)
 export ARCPPFLAGS = -Wall $(INCFLAGS)
-export PLATFORM_OS = -D__OS_LINUX__
+export PLATFORM_OS = __OS_LINUX__
+#export PLATFORM_OS = __OS_MAC__
 export DEBUG_FLAGS = -DDEBUG -g
 
 ifeq "$(LIBTYPE)" "AR"
-export CFLAGS := $(ARCFLAGS) $(PLATFORM_OS) $(DEBUG_FLAGS)
-export CPPFLAGS := $(ARCPPFLAGS) $(PLATFORM_OS) $(DEBUG_FLAGS)
+export CFLAGS := $(ARCFLAGS) -D$(PLATFORM_OS) $(DEBUG_FLAGS)
+export CPPFLAGS := $(ARCPPFLAGS) -D$(PLATFORM_OS) $(DEBUG_FLAGS)
 else
-export CFLAGS := $(SOCFLAGS) $(PLATFORM_OS) $(DEBUG_FLAGS)
-export CPPFLAGS := $(SOCPPFLAGS) $(PLATFORM_OS) $(DEBUG_FLAGS)
+export CFLAGS := $(SOCFLAGS) -D$(PLATFORM_OS) $(DEBUG_FLAGS)
+export CPPFLAGS := $(SOCPPFLAGS) -D$(PLATFORM_OS) $(DEBUG_FLAGS)
 endif
 
 export CPPSRCS := $(wildcard *.cc)
