@@ -1,5 +1,10 @@
 export BASEDIR ?= $(shell pwd)
 
+ifneq ($(findstring $(BASEDIR), $(shell pwd)), $(BASEDIR))
+$(info BASEDIR=$(BASEDIR) is not set correctly )
+$(error make sure BASEDIR is set correctly before running make!!)
+endif
+
 export PLATFORM_LINUX = __OS_LINUX__
 export PLATFORM_MAC = __OS_MAC__
 #export PLATFORM_OS = $(PLATFORM_LINUX)
