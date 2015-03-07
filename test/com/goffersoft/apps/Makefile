@@ -1,5 +1,5 @@
 ifeq "$(MAKETYPE)" "$(MAKETYPE_RECURSE)"
-export SUBDIRS = apps core main
+export SUBDIRS = bio
 include $(BASEDIR)/variables.mk
 include $(BASEDIR)/global.mk
 include $(BASEDIR)/clean.mk

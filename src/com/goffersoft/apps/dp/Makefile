@@ -1,7 +1,7 @@
 ifeq "$(MAKETYPE)" "$(MAKETYPE_RECURSE)"
-export SUBDIRS = apps core main
-include $(BASEDIR)/variables.mk
+export SUBDIRS = -
 include $(BASEDIR)/global.mk
+include $(BASEDIR)/variables.mk
 include $(BASEDIR)/clean.mk
 else
 CPPEXTRAFLAGS :=

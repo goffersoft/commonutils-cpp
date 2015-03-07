@@ -2,12 +2,11 @@
 
 all: $(OBJS) $(LIBNAME)
 
-ifeq "$(LIBTYPE)" "AR"
+ifneq "$(OBJS)" ""
 $(LIBNAME) : $(OBJS)
-	$(AR) -rcs $(LIBNAME) $(OBJS)
+	$(LIBTOOL) $(LIBOPTS) $(LIBNAME) $(OBJS)
 else
 $(LIBNAME) : $(OBJS)
-	$(CC) -shared -o $(LIBNAME) -fPIC $(OBJS)
 endif
 
 $(OBJS): | $(OBJDIR) $(LIBDIR)
