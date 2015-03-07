@@ -15,7 +15,7 @@ const char BioUtils::alphabets_compliment[] = { 't', 'a', 'g', 'c', 'n' };
 using std::stringstream;
 
 int BioUtils::is_alphabet(char alpha) {
-  int i = 0;
+  unsigned i = 0;
   while(i < num_alphabets) {
     if(alphabets[i] == tolower(alpha))
       return i;
@@ -29,7 +29,7 @@ BioUtils::_compliment(string& str1, const string& str, bool reverse) {
   int index;
   char tmp;
 
-  for(int i = 0; i < str.length(); i++) {
+  for(unsigned i = 0; i < str.length(); i++) {
     if((index = is_alphabet(str[i])) != -1) {
       tmp = alphabets_compliment[index];
     } else {
@@ -66,14 +66,14 @@ unsigned
 BioUtils::hamming_distance(const string& str1,
                            const string& str2,
                            unsigned length) {
-  int len = min(str1.length(), str2.length());
+  unsigned len = min(str1.length(), str2.length());
 
   if(length > 0 && length < len) {
     len = length;
   }
   int hamming_distance = 0;
 
-  for(int i = 0; i < len; i++)
+  for(unsigned i = 0; i < len; i++)
   {
     if(tolower(str1[i]) != tolower(str2[i]))
       hamming_distance++;
@@ -86,10 +86,10 @@ string
 BioUtils::skew_graph(const string& str, unsigned length) {
   int numc = 0;
   int numg = 0;
-  int i = 0;
+  unsigned i = 0;
   stringstream ss;
   
-  int len = str.length();
+  unsigned len = str.length();
 
   if(length > 0 && length < len) {
     len = length;
