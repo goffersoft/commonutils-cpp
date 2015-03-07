@@ -33,6 +33,7 @@ export INCDIR = $(BASEDIR)/$(INCLUDEDIRNAME)
 export BINDIR = $(BASEDIR)/$(BINDIRNAME)
 export LIBDIR = $(BASEDIR)/$(LIBDIRNAME)
 export EXTLIBDIR = $(BASEDIR)/../$(EXTDIRNAME)
+export LOCALEXTLIBDIR = $(BASEDIR)/$(EXTDIRNAME)
 export OBJDIR = $(subst $(SRCDIRNAME),$(OBJDIRNAME),$(shell pwd))
 
 export LIBNAME = $(subst /,_,$(shell pwd))
