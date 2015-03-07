@@ -20,6 +20,7 @@ export SO_EXETYPE_EXE = "EXE"
 export SO_EXETYPE = $(SO_EXETYPE_EXE)
 
 export SRCDIRNAME = src
+export TESTDIRNAME = test
 export BINDIRNAME = bin
 export OBJDIRNAME = obj
 export LIBDIRNAME = lib
@@ -34,7 +35,11 @@ export BINDIR = $(BASEDIR)/$(BINDIRNAME)
 export LIBDIR = $(BASEDIR)/$(LIBDIRNAME)
 export EXTLIBDIR = $(BASEDIR)/../$(EXTDIRNAME)
 export LOCALEXTLIBDIR = $(BASEDIR)/$(EXTDIRNAME)
-export OBJDIR = $(subst $(SRCDIRNAME),$(OBJDIRNAME),$(shell pwd))
+ifeq ($(findstring $(SRCDIRNAME), $(shell pwd)), $(SRCDIRNAME))
+export OBJDIR = $(subst $(SRCDIRNAME),$(OBJDIRNAME)/$(SRCDIRNAME),$(shell pwd))
+else
+export OBJDIR = $(subst $(TESTDIRNAME),$(OBJDIRNAME)/$(TESTDIRNAME),$(shell pwd))
+endif
 
 export LIBNAME = $(subst /,_,$(shell pwd))
 export LIBNAME := $(lastword $(LIBNAME))
