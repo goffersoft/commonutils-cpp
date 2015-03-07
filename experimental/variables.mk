@@ -24,11 +24,15 @@ export BINDIRNAME = bin
 export OBJDIRNAME = obj
 export LIBDIRNAME = lib
 export INCLUDEDIRNAME = inc
+export EXTDIRNAME = ext
+
+export BOOSTDIRNAME = boost_1_57_0
 
 export SRCDIR = $(BASEDIR)/$(SRCDIRNAME)
 export INCDIR = $(BASEDIR)/$(INCLUDEDIRNAME)
 export BINDIR = $(BASEDIR)/$(BINDIRNAME)
 export LIBDIR = $(BASEDIR)/$(LIBDIRNAME)
+export EXTLIBDIR = $(BASEDIR)/../$(EXTDIRNAME)
 export OBJDIR = $(subst $(SRCDIRNAME),$(OBJDIRNAME),$(shell pwd))
 
 export LIBNAME = $(subst /,_,$(shell pwd))
@@ -47,9 +51,11 @@ export MKDIR = @mkdir -p
 export CC = gcc
 export AR = ar
 
+export EXTINCFLAGS = -I$(BASEDIR)/$(EXTDIRNAME)/$(BOOSTDIRNAME)
 export INCFLAGS ?= -I$(INCDIR) \
                    $(addprefix -I$(SRCDIR),$(subst $(SRCDIR), \
-                     ,${shell find ${SRCDIR} -type d -print}))
+                     ,${shell find ${SRCDIR} -type d -print})) \
+                   $(EXTINCFLAGS)
 
 export CCFLAGS = -Wall $(INCFLAGS) -D$(PLATFORM_OS)
 export SOCFLAGS = -fPIC

@@ -3,7 +3,8 @@
 LIBS = $(shell ls $(LIBDIR))
 LOCALLIBS := $(addprefix $(LIBDIR)/, $(LIBS))
 EXENAME = $(EXE)
-LDFLAGS = $(INCFLAGS) -L$(LIBDIR)
+EXTLDFLAGS = -L$(EXTLIBDIR)/$(BOOSTDIRNAME)/stage/lib
+LDFLAGS = $(INCFLAGS) -L$(LIBDIR) $(EXTLDFLAGS)
 
 ifeq "$(LIBTYPE)" "$(LIBTYPE_AR)"
 ifeq "$(PLATFORM_OS)" "$(PLATFORM_LINUX)"
@@ -30,11 +31,12 @@ endif
 endif
 endif
 STDLIBS = -lstdc++ -lpthread
+EXTLIBS = 
 LIBS := $(addprefix $(LIBDIR)/, $(LIBS))
 
 all: $(LIBS) $(EXENAME)
 
 $(EXENAME) : $(LIBS)
-	$(CC) -o $(EXENAME) $(LDFLAGS) $(LOCALLIBS) $(STDLIBS)
+	$(CC) -o $(EXENAME) $(LDFLAGS) $(LOCALLIBS) $(STDLIBS) $(EXTLIBS)
 
 -include $(BASEDIR)/clean.mk
