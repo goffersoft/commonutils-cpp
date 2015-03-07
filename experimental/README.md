@@ -22,8 +22,8 @@ Before running make do the following
     d) change bin/Makefile -->  EXTLDFLAGS to add lib dirs
     e) change bin/Makefile -->  EXTLIBS to link external libs
     f) the following two helper variables are defined in variables.mk
-       i) EXTLIBDIR --> points to commonutils-cpp/ext
-      ii) EXTLOCALLIBDIR --> points to commonutils-cpp/<proj-name>/ext
+       i) EXTDIR --> points to commonutils-cpp/ext
+      ii) EXTLOCALDIR --> points to commonutils-cpp/<proj-name>/ext
 
 Using the google style guide for c/c++ code
 http://google-styleguide.googlecode.com/svn/trunk/cppguide.html

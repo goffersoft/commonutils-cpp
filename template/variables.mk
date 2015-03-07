@@ -38,8 +38,8 @@ export SRCDIR = $(BASEDIR)/$(SRCDIRNAME)
 export INCDIR = $(BASEDIR)/$(INCLUDEDIRNAME)
 export BINDIR = $(BASEDIR)/$(BINDIRNAME)
 export LIBDIR = $(BASEDIR)/$(LIBDIRNAME)
-export EXTLIBDIR = $(BASEDIR)/../$(EXTDIRNAME)
-export EXTLOCALLIBDIR = $(BASEDIR)/$(EXTDIRNAME)
+export EXTDIR = $(BASEDIR)/../$(EXTDIRNAME)
+export EXTLOCALDIR = $(BASEDIR)/$(EXTDIRNAME)
 ifeq ($(findstring $(SRCDIRNAME), $(shell pwd)), $(SRCDIRNAME))
 export OBJDIR = $(subst $(SRCDIRNAME),$(OBJDIRNAME)/$(SRCDIRNAME),$(shell pwd))
 else
@@ -62,7 +62,7 @@ export MKDIR = @mkdir -p
 export CC = gcc
 export AR = ar
 
-export EXTINCFLAGS = -I$(BASEDIR)/$(EXTDIRNAME)/$(BOOSTDIRNAME)
+export EXTINCFLAGS = -I$(EXTDIR)/$(BOOSTDIRNAME)
 export INCFLAGS ?= -I$(INCDIR) \
                    $(addprefix -I$(SRCDIR),$(subst $(SRCDIR), \
                      ,${shell find ${SRCDIR} -type d -print})) \
