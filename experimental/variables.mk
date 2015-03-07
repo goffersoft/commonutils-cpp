@@ -34,7 +34,7 @@ export INCDIR = $(BASEDIR)/$(INCLUDEDIRNAME)
 export BINDIR = $(BASEDIR)/$(BINDIRNAME)
 export LIBDIR = $(BASEDIR)/$(LIBDIRNAME)
 export EXTLIBDIR = $(BASEDIR)/../$(EXTDIRNAME)
-export LOCALEXTLIBDIR = $(BASEDIR)/$(EXTDIRNAME)
+export EXTLOCALLIBDIR = $(BASEDIR)/$(EXTDIRNAME)
 ifeq ($(findstring $(SRCDIRNAME), $(shell pwd)), $(SRCDIRNAME))
 export OBJDIR = $(subst $(SRCDIRNAME),$(OBJDIRNAME)/$(SRCDIRNAME),$(shell pwd))
 else
