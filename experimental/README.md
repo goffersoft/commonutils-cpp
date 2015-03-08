@@ -5,7 +5,7 @@ Create a common framework for c++
 
 Before running make do the following
 
-1) export BASEDIR=<path_to_this_dir>
+1) export BASEDIR=*<path_to_this_dir*>
 
 2) change PLATFORM_OS (in $BASEDIR/variable.mk) to
 
