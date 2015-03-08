@@ -7,8 +7,8 @@ endif
 
 export PLATFORM_LINUX = __OS_LINUX__
 export PLATFORM_MAC = __OS_MAC__
-#export PLATFORM_OS = $(PLATFORM_LINUX)
-export PLATFORM_OS = $(PLATFORM_MAC)
+export PLATFORM_OS = $(PLATFORM_LINUX)
+#export PLATFORM_OS = $(PLATFORM_MAC)
 
 export MAKETYPE_RECURSE = RECURSE
 export MAKETYPE_NORECURSE = NORECURSE
@@ -68,7 +68,7 @@ export INCFLAGS ?= -I$(INCDIR) \
                      ,${shell find ${SRCDIR} -type d -print})) \
                    $(EXTINCFLAGS)
 
-export CCFLAGS = -Wall $(INCFLAGS) -D$(PLATFORM_OS)
+export CCFLAGS = -Wall $(INCFLAGS) -D$(PLATFORM_OS) -DBOOST_LOG_DYN_LINK
 export SOCFLAGS = -fPIC
 export SOCPPFLAGS = -fPIC
 export ARCFLAGS = 

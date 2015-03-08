@@ -26,6 +26,7 @@ struct mem : public slink {
 
 static Pool* list_of_pools;
 
+#if 0
 void* operator new(size_t sz) throw(std::bad_alloc) {
     cout<< "My New Called" << endl;
     Pool* x = list_of_pools;
@@ -72,6 +73,7 @@ void operator delete(void* ptr) throw() {
     x->mempool = mem_ptr;
     return;
 }
+#endif
 
 void print_mem_pool() {
     Pool* x = list_of_pools;
@@ -87,7 +89,6 @@ void print_mem_pool() {
         x = (Pool*)(x->get_next());
     }
 }
-
 
 int alloc_test_main(int argc, char** argv) {
     int *i = new int(10);

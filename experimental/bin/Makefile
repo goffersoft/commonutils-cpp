@@ -31,12 +31,12 @@ endif
 endif
 endif
 STDLIBS = -lstdc++ -lpthread
-EXTLIBS = 
+EXTLIBS = -lboost_system -lboost_filesystem -lboost_thread -lboost_log -lboost_log_setup
 LIBS := $(addprefix $(LIBDIR)/, $(LIBS))
 
 all: $(LIBS) $(EXENAME)
 
 $(EXENAME) : $(LIBS)
-	$(CC) -o $(EXENAME) $(LDFLAGS) $(LOCALLIBS) $(STDLIBS) $(EXTLIBS)
+	$(CC) -o $(EXENAME) $(LDFLAGS) $(LOCALLIBS) $(EXTLIBS) $(STDLIBS)
 
 -include $(BASEDIR)/clean.mk
