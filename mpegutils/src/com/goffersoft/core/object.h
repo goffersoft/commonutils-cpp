@@ -32,78 +32,78 @@ namespace core {
 
 class Object {
 
-    protected :
+  protected :
 
-        Object() {}
-        virtual ~Object() {}
+    Object() {}
+    virtual ~Object() {}
 
 
-        virtual int cmp(const Object& obj) const {
-            if(this == &obj)
-                return 0;
-            else if(this < &obj)
-                return -1;
-            else
-                return 1;
-        }
+    virtual int cmp(const Object& obj) const {
+      if (this == &obj)
+        return 0;
+      else if (this < &obj) {
+        return -1;
+      else
+        return 1;
+    }
 
-        virtual string to_string() const {
-            return string("string rep of the Object");
-        }
+    virtual string to_string() const {
+      return string("string rep of the Object");
+    }
 
-    public :
+  public :
 
-        operator string() const {
-            return to_string();
-        }
+    operator string() const {
+      return to_string();
+    }
 
-        friend int operator ==(const Object& lhs, 
-                         const Object& rhs) {
-            if(typeid(lhs) != typeid(rhs))
-                return false;
+    friend int operator ==(const Object& lhs, 
+                           const Object& rhs) {
+      if (typeid(lhs) != typeid(rhs))
+        return false;
 
-            return (lhs.cmp(rhs) == 0);
-        }
+      return (lhs.cmp(rhs) == 0);
+    }
 
-        friend int operator !=(const Object& lhs, 
-                                const Object& rhs) {
-            if(typeid(lhs) != typeid(rhs))
-                return true;
+    friend int operator !=(const Object& lhs, 
+                           const Object& rhs) {
+      if (typeid(lhs) != typeid(rhs))
+        return true;
 
-            return (lhs.cmp(rhs) != 0);
-        }
+      return (lhs.cmp(rhs) != 0);
+    }
          
-        friend int operator <=(const Object& lhs, 
-                                const Object& rhs) {
-            if(typeid(lhs) != typeid(rhs))
-                return false;
+    friend int operator <=(const Object& lhs, 
+                           const Object& rhs) {
+      if (typeid(lhs) != typeid(rhs))
+        return false;
 
-            return !(lhs.cmp(rhs) > 0);
-        }
+      return !(lhs.cmp(rhs) > 0);
+    }
 
-        friend int operator >=(const Object& lhs, 
-                                const Object& rhs) {
-            if(typeid(lhs) != typeid(rhs))
-                return false;
+    friend int operator >=(const Object& lhs, 
+                           const Object& rhs) {
+      if (typeid(lhs) != typeid(rhs))
+        return false;
 
-            return !(lhs.cmp(rhs) < 0);
-        }
+      return !(lhs.cmp(rhs) < 0);
+    }
 
-        friend int operator >(const Object& lhs, 
-                                const Object& rhs) {
-            if(typeid(lhs) != typeid(rhs))
-                return false;
+    friend int operator >(const Object& lhs, 
+                          const Object& rhs) {
+      if (typeid(lhs) != typeid(rhs))
+        return false;
 
-            return (lhs.cmp(rhs) > 0);
-        }
+      return (lhs.cmp(rhs) > 0);
+    }
 
-        friend int operator <(const Object& lhs, 
-                                const Object& rhs) {
-            if(typeid(lhs) != typeid(rhs))
-                return false;
+    friend int operator <(const Object& lhs, 
+                          const Object& rhs) {
+      if (typeid(lhs) != typeid(rhs))
+        return false;
 
-            return (lhs.cmp(rhs) < 0);
-        }
+      return (lhs.cmp(rhs) < 0);
+    }
 };
 
 } /* com */
