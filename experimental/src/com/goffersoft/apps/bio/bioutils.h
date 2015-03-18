@@ -35,9 +35,11 @@ using std::string;
 
 class BioUtils {
   public :
-    static const char alphabets[5]; //{ 'a', 't', 'c', 'g', 'n' };
+    //{ 'a', 't', 'c', 'g', 'n' };
+    static const char alphabets[5]; 
+    //{ 't', 'a', 'g', 'c', 'n' };
+    static const char alphabets_compliment[5];
     static const unsigned num_alphabets;
-    static const char alphabets_compliment[5]; //{ 't', 'a', 'g', 'c', 'n' };
 
     static string reverse_compliment(const string& str);
     static string compliment(const string& str);

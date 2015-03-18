@@ -7,17 +7,20 @@ namespace goffersoft {
 namespace apps {
 namespace bio {
   
-const char BioUtils::alphabets[] = { 'a', 't', 'c', 'g', 'n' };
-const unsigned BioUtils::num_alphabets = sizeof(alphabets)/sizeof(char);
+const char BioUtils::alphabets[] =
+             { 'a', 't', 'c', 'g', 'n' };
+const unsigned BioUtils::num_alphabets =
+             sizeof(alphabets)/sizeof(char);
 
-const char BioUtils::alphabets_compliment[] = { 't', 'a', 'g', 'c', 'n' };
+const char BioUtils::alphabets_compliment[] =
+             { 't', 'a', 'g', 'c', 'n' };
 
 using std::stringstream;
 
 int BioUtils::is_alphabet(char alpha) {
   unsigned i = 0;
-  while(i < num_alphabets) {
-    if(alphabets[i] == tolower(alpha))
+  while (i < num_alphabets) {
+    if (alphabets[i] == tolower(alpha))
       return i;
     i++;
   }
@@ -25,17 +28,19 @@ int BioUtils::is_alphabet(char alpha) {
 }
 
 string&
-BioUtils::_compliment(string& str1, const string& str, bool reverse) {
+BioUtils::_compliment(string& str1,
+                      const string& str,
+                      bool reverse) {
   int index;
   char tmp;
 
-  for(unsigned i = 0; i < str.length(); i++) {
-    if((index = is_alphabet(str[i])) != -1) {
+  for (unsigned i = 0; i < str.length(); i++) {
+    if ((index = is_alphabet(str[i])) != -1) {
       tmp = alphabets_compliment[index];
     } else {
       tmp = str[i];
     }
-    if(reverse)
+    if (reverse)
       ((char *)(str1.c_str()))[str.length() - i - 1] = tmp;
     else
       ((char *)(str1.c_str()))[i] = tmp;
@@ -68,14 +73,14 @@ BioUtils::hamming_distance(const string& str1,
                            unsigned length) {
   unsigned len = min(str1.length(), str2.length());
 
-  if(length > 0 && length < len) {
+  if (length > 0 && length < len) {
     len = length;
   }
   int hamming_distance = 0;
 
-  for(unsigned i = 0; i < len; i++)
+  for (unsigned i = 0; i < len; i++)
   {
-    if(tolower(str1[i]) != tolower(str2[i]))
+    if (tolower(str1[i]) != tolower(str2[i]))
       hamming_distance++;
   }
 
@@ -91,12 +96,12 @@ BioUtils::skew_graph(const string& str, unsigned length) {
   
   unsigned len = str.length();
 
-  if(length > 0 && length < len) {
+  if (length > 0 && length < len) {
     len = length;
   }
 
   while (i < len) {
-    if(tolower(str[i]) == 'c') {
+    if (tolower(str[i]) == 'c') {
       numc++;
     } else if (tolower(str[i]) == 'g') {
       numg++;
