@@ -41,7 +41,7 @@ class Object {
     virtual int cmp(const Object& obj) const {
       if (this == &obj)
         return 0;
-      else if (this < &obj) {
+      else if (this < &obj)
         return -1;
       else
         return 1;
