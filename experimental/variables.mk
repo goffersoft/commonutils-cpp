@@ -46,9 +46,10 @@ else
 export OBJDIR = $(subst $(TESTDIRNAME),$(OBJDIRNAME)/$(TESTDIRNAME),$(shell pwd))
 endif
 
-export LIBNAME = $(subst /,_,$(shell pwd))
+export TMP := $(subst /,_,$(BASEDIR))
+export LIBNAME := $(subst /,_,$(shell pwd))
+export LIBNAME := $(subst $(TMP),lib,$(LIBNAME))
 export LIBNAME := $(lastword $(LIBNAME))
-export LIBNAME := $(addprefix lib,$(LIBNAME))
 export SOLIBNAME = $(LIBDIR)/$(LIBNAME).so
 export DYLIBNAME = $(LIBDIR)/$(LIBNAME).dylib
 export ARLIBNAME = $(LIBDIR)/$(LIBNAME).ar
