@@ -31,7 +31,11 @@ endif
 endif
 endif
 STDLIBS = -lstdc++ -lpthread
+ifdef INCLUDE_BOOST
 EXTLIBS = -lboost_system -lboost_filesystem -lboost_thread -lboost_log -lboost_log_setup
+else
+EXTLIBS =
+endif
 LIBS := $(addprefix $(LIBDIR)/, $(LIBS))
 
 all: $(LIBS) $(EXENAME)
