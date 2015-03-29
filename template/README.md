@@ -32,7 +32,7 @@ Before running make do the following
        i) EXTDIR --> points to commonutils-cpp/ext
       ii) EXTLOCALDIR --> points to commonutils-cpp/<proj-name>/ext
 
-4) Install boost(optional - may require changes to bin/Makefile)
+4) Install boost(optional)
 
     a) Download the boost tarball(linux and mac) and copy to $(EXTDIR)
     
@@ -59,6 +59,9 @@ Before running make do the following
     k) step j is required because BOOST_LOG_DYN_LINK flag is set at compile time
        and apprently is needed for some of the boost libraries.
 
+    l) uncomment the following line in variables.mk
+        export INCLUDE_BOOST = 1
+
 Using the google style guide for c/c++ code
 
 http://google-styleguide.googlecode.com/svn/trunk/cppguide.html
@@ -68,4 +71,3 @@ all cpp file end with .cc
 all c files end with .c
 
 all header files end with .h
-

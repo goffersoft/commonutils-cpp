@@ -7,8 +7,12 @@ endif
 
 export PLATFORM_LINUX = __OS_LINUX__
 export PLATFORM_MAC = __OS_MAC__
-#export PLATFORM_OS = $(PLATFORM_LINUX)
-export PLATFORM_OS = $(PLATFORM_MAC)
+export PLATFORM_OS = $(PLATFORM_LINUX)
+#export PLATFORM_OS = $(PLATFORM_MAC)
+
+#export INCLUDE_BOOST = 1
+export BOOSTDIRNAME = boost_1_57_0
+
 
 export MAKETYPE_RECURSE = RECURSE
 export MAKETYPE_NORECURSE = NORECURSE
@@ -31,8 +35,6 @@ export OBJDIRNAME = obj
 export LIBDIRNAME = lib
 export INCLUDEDIRNAME = inc
 export EXTDIRNAME = ext
-
-export BOOSTDIRNAME = boost_1_57_0
 
 export SRCDIR = $(BASEDIR)/$(SRCDIRNAME)
 export INCDIR = $(BASEDIR)/$(INCLUDEDIRNAME)
@@ -96,7 +98,7 @@ ifeq "$(PLATFORM_OS)" "$(PLATFORM_LINUX)"
 export LIBNAME := $(ARLIBNAME)
 export LIBTOOL = $(AR)
 export LIBOPTS = -rcs
-else 
+else
 ifeq "$(PLATFORM_OS)" "$(PLATFORM_MAC)"
 export LIBNAME := $(DYLIBNAME)
 export LIBTOOL = $(CC)
