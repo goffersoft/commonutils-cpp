@@ -1,6 +1,9 @@
 #include <iostream>
 #include <string>
 #include "list.h"
+#include "hash.h"
+#include "array.h"
+#include "assert_helper.h"
 
 using std::cout;
 using std::endl;
@@ -12,6 +15,7 @@ using com::goffersoft::core::SList;
 using com::goffersoft::core::ISList;
 using com::goffersoft::core::DList;
 using com::goffersoft::core::IDList;
+using com::goffersoft::core::AssertHelper;
 
 static char membase[1024];
 static char poolbase[256];
@@ -105,10 +109,23 @@ struct dsl : public DLink {
   dsl(int aaa) : a(aaa) {}
 };
 
+int func(int a[], int size) {
+  for (int i = 0; i < size; i++) {
+    cout << a[i] << endl;
+  }
+  return size;
+}
+
 int alloc_test_main(int argc, char** argv) {
   int *i = new int(10);
   int *j = new int(20);
   string *s = new string("Hello World");
+
+  int *arr = new int[10];
+  int *elem = new int;
+
+  func(arr, 10);
+  func(elem, 1);
 
   SList<int> l1;
   ISList<isl> l2;
@@ -134,6 +151,9 @@ int alloc_test_main(int argc, char** argv) {
   print_mem_pool();
     
   delete s;
+
+  AssertHelper::equals(1, *i);
+  AssertHelper::not_equals(1, *i);
    
   print_mem_pool();
 

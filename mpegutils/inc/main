@@ -26,5 +26,6 @@
 
 extern int boost_test_main(int argc, char **argv);
 extern int alloc_test_main(int argc, char **argv);
+extern int list_test_main(int argc, char **argv);
 
 #endif /* __MAIN__ */

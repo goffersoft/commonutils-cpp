@@ -1,0 +1,564 @@
+/** 
+ **
+ ** This file is part of mepgutils.
+ **
+ ** mpegutils is free software: you can redistribute it and/or modify
+ ** it under the terms of the GNU General Public License as published by
+ ** the Free Software Foundation, either version 3 of the License, or
+ ** (at your option) any later version.
+ **
+ ** mpegutils is distributed in the hope that it will be useful,
+ ** but WITHOUT ANY WARRANTY; without even the implied warranty of
+ ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ ** GNU General Public License for more details.
+ **
+ ** You should have received a copy of the GNU General Public License
+ ** along with mpegutils. If not, see <http://www.gnu.org/licenses/>.
+ **
+ ** This file descrbes the object class of the mpegutils project.
+ ** This class contains code for hashtypes.
+ ** HashFunction algorithems are taken from wiki 
+ ** http://www.eternallyconfuzzled.com/tuts/algorithms/jsw_tut_hashing.aspx
+ **/
+#ifndef __HASH_TYPES_H__
+#define __HASH_TYPES_H__
+
+#include <iostream>
+#include <random>
+#include <array>
+
+using std::istream;
+using std::ostream;
+using std::cin;
+using std::cout;
+using std::endl;
+
+namespace com {
+namespace goffersoft {
+namespace core {
+
+using std::default_random_engine;
+using std::uniform_int_distribution;
+
+template <typename K> class HashFunctionJSW;
+
+template <typename K>
+class HashCompare {
+  public:
+    virtual int operator()(const K& k1,
+                   const K& k2) const {
+      return ((k1 < k2)?-1:((k1 > k2)?1:0));
+    }
+};
+
+template <typename K>
+class HashFunction {
+  public:
+    static const HashFunction<K>& hash_function_add;
+    static const HashFunction<K>& hash_function_xor;
+    static const HashFunction<K>& hash_function_rot;
+    static const HashFunction<K>& hash_function_bernstein;
+    static const HashFunction<K>& hash_function_bernstein_xor;
+    static const HashFunction<K>& hash_function_shift_add_xor;
+    static const HashFunction<K>& hash_function_fnv;
+    static const HashFunction<K>& hash_function_oat;
+    static const HashFunctionJSW<K>& hash_function_jsw;
+    static const HashFunction<K>& hash_function_elf;
+    static const HashFunction<K>& hash_function_jenkins;
+
+    virtual unsigned operator()(const K& key, unsigned keylen) const = 0;
+
+    static void test_hash_function(unsigned num_bkts,
+                              unsigned keylen,
+                              HashFunction<K> hash_func,
+                              istream& is = cin,
+                              ostream& os = cout) {
+      unsigned* table = new unsigned[num_bkts];
+      char* buffer = new char[keylen];
+
+      while (is >> buffer) {
+        table[hash_func(buffer, keylen) % num_bkts] += 1;
+      }
+
+      os << "Collision Feequency: "<< endl;
+      for(int i = 0; i < num_bkts; i++) {
+        os << "table[" << i << "]= " << table[i] << endl;
+      }
+      delete[] table;
+      delete[] buffer;
+    }
+};
+
+
+template <typename K>
+class HashType {
+  private :
+    const HashFunction<K>& hash_function;
+    const HashCompare<K>& compare_function;
+
+  public:
+    static const HashFunction<K>& default_hash_function;
+    static const HashCompare<K>& default_compare_function;
+
+    HashType(const HashFunction<K>& hf = default_hash_function,
+             const HashCompare<K>& hc = default_compare_function) :
+             hash_function(hf),
+             compare_function(hc) {}
+
+    const HashFunction<K>& hash() const { return hash_function; }
+    const HashCompare<K>& compare() const { return compare_function; };
+};
+
+//Additive Hash
+//Probably the simplest algorithm for hashing a
+//sequence of integral values (such as a string),
+//is to add all of the characters together and then
+//force the range into something suitable for lookup
+//with the remainder of division. I will give an example
+//of this algorithm only because books commonly suggest
+//it in their rush to get past the topic of hash
+//functions on their way to collision resolution methods.
+//This algorithm is very bad:
+template <typename K>
+class HashFunctionAdd : public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = 0;
+      int i;
+
+      for (i = 0; i < keylen; i++) {
+        h += p[i];
+      }
+      return h;
+    }
+};
+
+//XOR Hash
+//The XOR hash is another algorithm commonly
+//suggested by textbooks. Instead of adding
+//together the bytes of an object as the
+//additive hash does, the XOR hash repeatedly
+//folds the bytes together to produce a seemingly
+//random hash value:
+template <typename K>
+class HashFunctionXor : public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = 0;
+      int i;
+
+      for (i = 0; i < keylen; i++) {
+         h ^= p[i];
+      }
+      return h;
+    }
+};
+
+//Rotating Hash
+//The rotating hash is identical to the XOR hash
+//except instead of simply folding each byte of
+//the input into the internal state, it also
+//performs a fold of the internal state before
+//combining it with the each byte of the input.
+//This extra mixing step is enough to give the
+//rotating hash a much better distribution. Much
+//of the time, the rotating hash is sufficient,
+//and can be considered the minimal acceptable
+//algorithm. Notice that with each improvement,
+//the internal state is being mixed up more and
+//more. This is a key element in a good hash function.
+template <typename K>
+class HashFunctionRot : public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = 0;
+      int i;
+
+      for (i = 0; i < keylen; i++) {
+        h = (h << 4) ^ (h >> 28) ^ p[i];
+      }
+
+      return h;
+    }
+};
+
+//Bernstein Hash
+//Dan Bernstein created this algorithm and posted
+//it in a newsgroup. It is known by many as the
+//Chris Torek hash because Chris went a long way
+//toward popularizing it. Since then it has been
+//used successfully by many, but despite that the
+//algorithm itself is not very sound when it comes
+//to avalanche and permutation of the internal state.
+//It has proven very good for small character keys,
+//where it can outperform algorithms that result in
+//a more random distribution
+//Bernstein's hash should be used with caution. It
+//performs very well in practice, for no apparently
+//known reasons (much like how the constant 33 does
+//better than more logical constants for no apparent
+//reason), but in theory it is not up to snuff. Always
+//test this function with sample data for every application
+//to ensure that it does not encounter a degenerate case
+//and cause excessive collisions.
+template <typename K>
+class HashFunctionBernstein : public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = 0;
+      int i;
+
+      for (i = 0; i < keylen; i++) {
+        h = 33 * h + p[i];
+      }
+
+      return h;
+    }
+};
+
+//Modified Bernstein Hash
+//A minor update to Bernstein's hash replaces addition
+//with XOR for the combining step. This change does not
+//appear to be well known or often used, the original
+//algorithm is still recommended by nearly everyone, but
+//the new algorithm typically results in a better distribution:
+template <typename K>
+class HashFunctionBernsteinXor : public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = 0;
+      int i;
+
+      for (i = 0; i < keylen; i++) {
+        h = 33 * h ^ p[i];
+      }
+
+      return h;
+    }
+};
+
+//Shift Add XOR Hash
+//The shift-add-XOR hash was designed as a string 
+//hashing function, but because it is so effective,
+//it works for any data as well with similar efficiency.
+//The algorithm is surprisingly similar to the rotating
+//hash except a different choice of constants for the
+//rotation is used, and addition is a preferred operation
+//for mixing. All in all, this is a surprisingly powerful
+//and flexible hash. Like many effective hashes, it will
+//fail tests for avalanche, but that does not seem to
+//affect its performance in practice.
+template <typename K>
+class HashFunctionShiftAddXor : public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = 0;
+      int i;
+
+      for (i = 0; i < keylen; i++) {
+        h ^= (h << 5) + (h >> 2) + p[i];
+      }
+
+      return h;
+    }
+};
+
+//FNV Hash
+//The FNV hash, short for Fowler/Noll/Vo in honor of the
+//creators, is a very powerful algorithm that, not
+//surprisingly, follows the same lines as Bernstein's
+//modified hash with carefully chosen constants. This
+//algorithm has been used in many applications with
+//wonderful results, and for its simplicity, the FNV
+//hash should be one of the first hashes tried in an
+//application. It is also recommended that the FNV
+//website be visited for useful descriptions of how
+//to modify the algorithm for various uses.
+template <typename K>
+class HashFunctionFNV : public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = 2166136261;
+      int i;
+
+      for (i = 0; i < keylen; i++) {
+        h = (h * 16777619) ^ p[i];
+      }
+
+      return h;
+    }
+};
+
+//One-At-A-Time Hash
+//This algorithm quickly reaches avalanche and performs
+//very well. This function is another that should be one
+//of the first to be tested in any application, if not the
+//very first. This algorithm is my personal preference as a
+//first test hash, and it has seen effective use in several
+//high level scripting languages as the hash function for
+//their associative array data type.
+template <typename K>
+class HashFunctionOAT : public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = 0;
+      int i;
+
+      for (i = 0; i < keylen; i++) {
+        h += p[i];
+        h += (h << 10);
+        h ^= (h >> 6);
+      }
+
+      h += (h << 3);
+      h ^= (h >> 11);
+      h += (h << 15);
+
+      return h;
+    }
+};
+
+//JSW Hash
+//This is a hash of the authors devising that combines
+//a rotating hash with a table of randomly generated
+//numbers. The algorithm walks through each byte of
+//the input, and uses it as an index into a table of
+//random integers generated by a good random number
+//generator. The internal state is rotated to mix it
+//up a bit, then XORed with the random number from the
+//table. The result is a uniform distribution if the
+//random numbers are uniform. The size of the table
+//should match the values in a byte. For example, if
+//a byte is eight bits then the table would hold 256
+//random numbers
+template <typename K>
+class HashFunctionJSW : public HashFunction<K> {
+  private:
+    //static unsigned tab[256];
+    //default_random_engine generator;
+    //uniform_int_distribution<unsigned> distribution;
+
+    inline unsigned get_random() {
+      //return distribution(generator);
+      return 1;
+    }
+
+  public:
+    HashFunctionJSW() {
+      reseed();
+    }
+
+    unsigned operator()(const K& key, unsigned keylen) const {
+      //const unsigned char *p = (const unsigned char *)(&key);
+      //unsigned h = 0;
+      //int i;
+
+     // for (i = 0; i < keylen; i++) {
+     //   h = (h << 1 | h >> 31) ^ tab[p[i]];
+     //   h = (h << 1 | h >> 31);
+     // }
+      //return h;
+      return 0;
+    }
+
+    void reseed() {
+      //for(int i = 0; i < 256; i++) {
+      //  tab[i] = get_random();
+      //}
+    }
+};
+
+//ELF Hash
+//The ELF hash function has been around for a while, and it is
+//believed to be one of the better algorithms out there. In my
+//experience, this is true, though ELF hash does not perform
+//sufficiently better than most of the other algorithms presented
+//in this tutorial to justify its slightly more complicated
+//implementation. It should be on your list of first functions
+//to test in a new lookup implementation
+template <typename K>
+class HashFunctionELF : public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = 0;
+      unsigned g;
+      int i;
+
+      for (i = 0; i < keylen; i++) {
+	h = (h << 4) + p[i];
+	g = h & 0xf0000000L;
+
+	if (g != 0)
+	{
+	    h ^= g >> 24;
+	}
+
+	h &= ~g;
+      }
+
+      return h;
+    }
+};
+
+//Jenkins Hash
+//The dreaded Jenkins hash has been thoroughly tested and
+//passes all kinds of tests for avalanche and permutations.
+//As such it is considered to be one of the best and most
+//thoroughly analyzed algorithms on the market presently.
+//Unfortunately, it is also ridiculously complicated compared
+//to the other hashes examined in this tutorial
+template <typename K>
+class HashFunctionJenkins : public HashFunction<K> {
+  private:
+    default_random_engine generator;
+    uniform_int_distribution<unsigned> distribution;
+
+    inline void mix(unsigned& a, unsigned& b, unsigned& c) const {
+      a -= b; a -= c; a ^= (c >> 13);
+      b -= c; b -= a; b ^= (a << 8);
+      c -= a; c -= b; c ^= (b >> 13);
+      a -= b; a -= c; a ^= (c >> 12);
+      b -= c; b -= a; b ^= (a << 16);
+      c -= a; c -= b; c ^= (b >> 5);
+      a -= b; a -= c; a ^= (c >> 3);
+      b -= c; b -= a; b ^= (a << 10);
+      c -= a; c -= b; c ^= (b >> 15);
+    }
+
+    inline unsigned get_random() {
+      return distribution(generator);
+    }
+
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *k = (const unsigned char *)(&key);
+      unsigned a, b;
+      unsigned c = (const_cast<HashFunctionJenkins*>(this))->get_random();
+      unsigned len = keylen;
+
+      a = b = 0x9e3779b9;
+
+      while (len >= 12) {
+        a += (k[0] + ((unsigned)k[1] << 8) +
+                      ((unsigned)k[2] << 16) +
+                      ((unsigned)k[3] << 24));
+        b += (k[4] + ((unsigned)k[5] << 8) +
+                      ((unsigned)k[6] << 16) +
+                      ((unsigned)k[7] << 24));
+        c += (k[8] + ((unsigned)k[9] << 8) +
+                      ((unsigned)k[10] << 16) +
+                      ((unsigned)k[11] << 24));
+
+        mix(a, b, c);
+
+        k += 12;
+        len -= 12;
+      }
+
+      c += keylen;
+
+      switch (len) {
+        case 11: c += ((unsigned)k[10] << 24);
+        case 10: c += ((unsigned)k[9] << 16);
+        case 9: c += ((unsigned)k[8] << 8);
+        /* First byte of c reserved for length */
+        case 8: b += ((unsigned)k[7] << 24);
+        case 7: b += ((unsigned)k[6] << 16);
+        case 6: b += ((unsigned)k[5] << 8);
+        case 5: b += k[4];
+        case 4: a += ((unsigned)k[3] << 24);
+        case 3: a += ((unsigned)k[2] << 16);
+        case 2: a += ((unsigned)k[1] << 8);
+        case 1: a += k[0];
+      }
+
+      mix(a, b, c);
+
+      return c;
+  }
+};
+
+//template <typename K>
+//unsigned
+//HashFunctionJSW<K>::
+//tab[256] = {0};
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_add = HashFunctionAdd<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_xor = HashFunctionXor<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_rot = HashFunctionRot<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_bernstein = HashFunctionBernstein<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_bernstein_xor = HashFunctionBernsteinXor<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_shift_add_xor = HashFunctionShiftAddXor<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_fnv = HashFunctionFNV<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_oat = HashFunctionOAT<K>();
+
+template <typename K>
+const HashFunctionJSW<K>&
+HashFunction<K>::
+hash_function_jsw = HashFunctionJSW<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_elf = HashFunctionELF<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashFunction<K>::
+hash_function_jenkins = HashFunctionJenkins<K>();
+
+template <typename K>
+const HashCompare<K>&
+HashType<K>::
+default_compare_function = HashCompare<K>();
+
+template <typename K>
+const HashFunction<K>&
+HashType<K>::
+default_hash_function = HashFunction<K>::hash_function_jsw;
+
+} /* com */
+} /* goffersoft */
+} /* core */
+
+#endif /* __HASH_TYPES_H__ */

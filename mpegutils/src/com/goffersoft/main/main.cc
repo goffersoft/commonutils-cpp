@@ -25,4 +25,5 @@ int main(int argc, char **argv) {
   cout << "Hello World"  << endl;
   alloc_test_main(argc, argv);
   boost_test_main(argc, argv);
+  list_test_main(argc, argv);
 }
