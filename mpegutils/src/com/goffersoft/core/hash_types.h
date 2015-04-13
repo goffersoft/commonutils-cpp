@@ -81,7 +81,7 @@ class HashFunction {
 
     static void test_hash_function(unsigned num_bkts,
                               unsigned keylen,
-                              HashFunction<K> hash_func,
+                              HashFunction<K>& hash_func,
                               istream& is = cin,
                               ostream& os = cout) {
       unsigned* table = new unsigned[num_bkts];

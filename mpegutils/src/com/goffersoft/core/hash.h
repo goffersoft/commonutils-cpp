@@ -35,32 +35,23 @@ using com::goffersoft::core::SafeArray;
 using com::goffersoft::core::HashType;
 using com::goffersoft::core::ForwardListIterator;
 
-template<typename K>
-size_t get_keylen(const K& k ) { return k.length(); }
+template<typename K> size_t get_keylen(const K& k ) { return k.length(); }
 
-template<>
-size_t get_keylen(const char& k ) { return sizeof(char); }
+template<> size_t get_keylen<char>(const char& k );
 
-template<>
-size_t get_keylen(const unsigned char& k ) { return sizeof(unsigned char); }
+template<> size_t get_keylen<unsigned char>(const unsigned char& k );
 
-template<>
-size_t get_keylen(const short& k ) { return sizeof(short); }
+template<> size_t get_keylen<short>(const short& k );
 
-template<>
-size_t get_keylen(const unsigned short& k ) { return sizeof(unsigned short); }
+template<> size_t get_keylen<unsigned short>(const unsigned short& k );
 
-template<>
-size_t get_keylen(const int& k ) { return sizeof(int); }
+template<> size_t get_keylen<int>(const int& k );
 
-template<>
-size_t get_keylen(const unsigned int& k ) { return sizeof(unsigned); }
+template<> size_t get_keylen<unsigned int>(const unsigned int& k );
 
-template<>
-size_t get_keylen(const long& k ) { return sizeof(long); }
+template<> size_t get_keylen<long>(const long& k );
 
-template<>
-size_t get_keylen(const unsigned long& k ) { return sizeof(unsigned long); }
+template<> size_t get_keylen<unsigned long>(const unsigned long& k );
 
 template <typename K, typename V>
 struct HashBucket;

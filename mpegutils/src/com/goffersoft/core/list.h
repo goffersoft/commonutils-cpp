@@ -860,7 +860,7 @@ SListBase::
 insert(SLink* link, int i) {
   if (i <= 0) {
     insert(link, nullptr);
-  } else if (i >= get_size()) {
+  } else if ((unsigned)i >= get_size()) {
     insert(link, get_tail());
   } else {
     SLink* prev = get(i-1);
@@ -923,7 +923,7 @@ get(int i, bool del) {
   SLink* link = get_head();
   int j = 0;
 
-  if (i < 0 || i >= get_size()) {
+  if (i < 0 || (unsigned)i >= get_size()) {
     return nullptr;
   }
 
@@ -965,7 +965,7 @@ CircularSListBase::
 insert(CSLink* link, int i) {
   if (i <= 0) {
     insert(link, nullptr);
-  } else if (i >= get_size()) {
+  } else if ((unsigned)i >= get_size()) {
     insert(link, get_tail());
   } else {
     CSLink* prev = get(i-1);
@@ -1030,7 +1030,7 @@ get(int i, bool del) {
   CSLink* link = get_head();
   int j = 0;
 
-  if ( i < 0 || i >= get_size()) {
+  if ( i < 0 || (unsigned)i >= get_size()) {
     return nullptr;
   }
 
@@ -1139,7 +1139,7 @@ insert(DLink* d, int i) {
   if (i <= 0) {
     insert(d, nullptr);
     return;
-  } if (i >= get_size()) {
+  } if ((unsigned)i >= get_size()) {
     insert(d, get_tail());
   } else {
     DLink* prev = get(i-1);
@@ -1194,7 +1194,7 @@ get(int i, bool del) {
   DLink* link = get_head();
   int j = 0;
 
-  if (i < 0 || i >= get_size()) {
+  if (i < 0 || (unsigned)i >= get_size()) {
     return nullptr;
   }
 
@@ -1232,7 +1232,7 @@ CircularDListBase::
 insert(CDLink* link, int i) {
   if (i <= 0) {
     insert(link, nullptr);
-  } else if (i >= get_size()) {
+  } else if ((unsigned)i >= get_size()) {
     insert(link, get_tail());
   } else {
     CDLink* prev = get(i-1);
@@ -1289,7 +1289,7 @@ get(int i, bool del) {
   CDLink* link = get_head();
   int j =  0;
 
-  if (i < 0 || i >= get_size()) {
+  if (i < 0 || (unsigned)i >= get_size()) {
     return nullptr;
   }
 
