@@ -221,7 +221,7 @@ class Hash {
     inline void set_num_buckets(unsigned nb) { num_buckets = nb; }
     inline HashBucket<K, V>* get_hash_bucket(const K& key) const {
       unsigned hash = hash_type.hash()(key, get_keylen<K>(key));
-      hash %= get_num_buckets();
+      hash &= (get_num_buckets() - 1);
       return &buckets[hash];
     }
 
@@ -230,7 +230,18 @@ class Hash {
 
     Hash(unsigned nb,
          const HashType<K>& ht = default_hash_type)
-          : num_buckets(nb), hash_type(ht) {
+          : hash_type(ht) {
+      unsigned j = 0;
+      if(nb <= 1) {
+        nb = 2;
+      } else {
+        for(unsigned i = 31; i > 0; i--) {
+          j = 1 << i;
+          if ((nb & j) == j )
+            break;
+        }
+        num_buckets = j*2;
+      }
       buckets = new HashBucket<K, V>[num_buckets];
     }
 

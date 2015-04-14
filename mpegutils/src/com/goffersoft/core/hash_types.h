@@ -52,7 +52,6 @@ template <typename K> class HashFunctionJSW;
 template <typename K> class HashFunctionELF;
 template <typename K> class HashFunctionJenkins;
 
-
 template <typename K>
 class HashCompare {
   public:
