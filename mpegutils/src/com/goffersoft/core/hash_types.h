@@ -136,9 +136,8 @@ class HashFunctionAdd : public HashFunction<K> {
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 0;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
         h += p[i];
       }
       return h;
@@ -158,9 +157,8 @@ class HashFunctionXor : public HashFunction<K> {
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 0;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
          h ^= p[i];
       }
       return h;
@@ -186,9 +184,8 @@ class HashFunctionRot : public HashFunction<K> {
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 0;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
         h = (h << 4) ^ (h >> 28) ^ p[i];
       }
 
@@ -221,9 +218,8 @@ class HashFunctionBernstein : public HashFunction<K> {
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 0;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
         h = 33 * h + p[i];
       }
 
@@ -243,9 +239,8 @@ class HashFunctionBernsteinXor : public HashFunction<K> {
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 0;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
         h = 33 * h ^ p[i];
       }
 
@@ -270,9 +265,8 @@ class HashFunctionShiftAddXor : public HashFunction<K> {
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 0;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
         h ^= (h << 5) + (h >> 2) + p[i];
       }
 
@@ -297,9 +291,8 @@ class HashFunctionFNV : public HashFunction<K> {
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 2166136261;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
         h = (h * 16777619) ^ p[i];
       }
 
@@ -321,9 +314,8 @@ class HashFunctionOAT : public HashFunction<K> {
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 0;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
         h += p[i];
         h += (h << 10);
         h ^= (h >> 6);
@@ -369,9 +361,8 @@ class HashFunctionJSW : public HashFunction<K> {
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 0;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
         h = (h << 1 | h >> 31) ^ tab[p[i]];
       }
       return h;
@@ -399,9 +390,8 @@ class HashFunctionELF : public HashFunction<K> {
       const unsigned char *p = (const unsigned char *)(&key);
       unsigned h = 0;
       unsigned g;
-      int i;
 
-      for (i = 0; i < keylen; i++) {
+      for (unsigned i = 0; i < keylen; i++) {
 	h = (h << 4) + p[i];
 	g = h & 0xf0000000L;
 

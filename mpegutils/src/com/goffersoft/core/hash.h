@@ -21,6 +21,7 @@
 #define __HASH_H__
 
 #include "list.h"
+
 #include "array.h"
 #include "hash_types.h"
 
@@ -119,7 +120,7 @@ struct HashBucket {
         }
         prev = node;
       }
-      return nullptr;
+      return create_node(key, value, prev);
     }
 
     const V* del(const K& key) {

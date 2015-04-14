@@ -101,21 +101,24 @@
  **     public methods in the various List classes. Singly 
  **     linked list classes only support the ForwardIterator
  **     class. Doubly Linked Lists support all iterator
- **     classes.
+ **     classes. By default type A is equal to T::NodeType.
+ **     Sometimes it is reuqired by nodetype to mimic target
+ **     NodeType so that the operator *
+ **     return the appropriate type.
  **     a) Genric List iterator base class
- **          template <typename T> class ListIterator
+ **          template <typename T, typename A> class ListIterator
  **
  **     b) Forward List iterator base class - traverses a list
  **        from start to end.
- **          template <typename T> class ForwardListIterator
+ **          template <typename T, typename A> class ForwardListIterator
  **
  **     c) Reverse List iterator base class - traverses a list
  **        from end to start.
- **          template <typename T> class ReverseListIterator
+ **          template <typename T, typename A> class ReverseListIterator
  **
  **     d) Bidirectional List iterator base class - traverses a list
  **        in both directions.
- **          template <typename T> class BidirectionalListIterator
+ **          template <typename T, typename A> class BidirectionalListIterator
  **
  **/
 #ifndef __LIST__H__

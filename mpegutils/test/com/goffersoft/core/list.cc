@@ -313,7 +313,11 @@ int list_test_main (int argc, char **argv) {
 
   h->put(5, 5);
 
-  cout << h->get(5) << endl;
+  int* x = h->get(5); 
+  if(x)
+    cout << *x << endl;
+  else
+    cout << "nullptr" << endl;
 
   delete h;
 
