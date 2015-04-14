@@ -56,6 +56,8 @@ template <typename K> class HashFunctionJenkins;
 template <typename K>
 class HashCompare {
   public:
+    static const HashCompare<K>& default_compare_function;
+
     virtual int operator()(const K& k1,
                    const K& k2) const {
       return ((k1 < k2)?-1:((k1 > k2)?1:0));
@@ -65,6 +67,8 @@ class HashCompare {
 template <typename K>
 class HashFunction {
   public:
+    static const HashFunction<K>& default_hash_function;
+
     static const HashFunctionAdd<K>& hash_function_add;
     static const HashFunctionXor<K>& hash_function_xor;
     static const HashFunctionRot<K>& hash_function_rot;
@@ -107,11 +111,8 @@ class HashType {
     const HashCompare<K>& compare_function;
 
   public:
-    static const HashFunction<K>& default_hash_function;
-    static const HashCompare<K>& default_compare_function;
-
-    HashType(const HashFunction<K>& hf = default_hash_function,
-             const HashCompare<K>& hc = default_compare_function) :
+    HashType(const HashFunction<K>& hf = HashFunction<K>::default_hash_function,
+             const HashCompare<K>& hc = HashCompare<K>::default_compare_function) :
              hash_function(hf),
              compare_function(hc) {}
 
@@ -558,14 +559,14 @@ HashFunction<K>::
 hash_function_jenkins = *(new HashFunctionJenkins<K>());
 
 template <typename K>
-const HashCompare<K>&
-HashType<K>::
-default_compare_function = *(new HashCompare<K>());
+const HashFunction<K>&
+HashFunction<K>::
+default_hash_function = *(new HashFunctionJenkins<K>());
 
 template <typename K>
-const HashFunction<K>&
-HashType<K>::
-default_hash_function = HashFunction<K>::hash_function_jenkins;
+const HashCompare<K>&
+HashCompare<K>::
+default_compare_function = *(new HashCompare<K>());
 
 } /* com */
 } /* goffersoft */

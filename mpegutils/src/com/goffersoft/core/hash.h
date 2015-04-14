@@ -15,7 +15,6 @@
  ** You should have received a copy of the GNU General Public License
  ** along with mpegutils. If not, see <http://www.gnu.org/licenses/>.
  **
- ** This file descrbes the object class of the mpegutils project.
  ** This class contains code to manipulate hash tables.
  **/
 #ifndef __HASH_H__
