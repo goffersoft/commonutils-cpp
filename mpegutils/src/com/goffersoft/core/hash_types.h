@@ -51,6 +51,7 @@ template <typename K> class HashFunctionOAT;
 template <typename K> class HashFunctionJSW;
 template <typename K> class HashFunctionELF;
 template <typename K> class HashFunctionJenkins;
+template <typename K> class HashFunctionJenkinsOneAtATime;
 
 template <typename K>
 class HashCompare {
@@ -79,6 +80,7 @@ class HashFunction {
     static const HashFunctionJSW<K>& hash_function_jsw;
     static const HashFunctionELF<K>& hash_function_elf;
     static const HashFunctionJenkins<K>& hash_function_jenkins;
+    static const HashFunctionJenkinsOneAtATime<K>& hash_function_jenkins_one_at_a_time;
 
     virtual unsigned operator()(const K& key, unsigned keylen) const = 0;
 
@@ -134,7 +136,7 @@ class HashFunctionAdd : public HashFunction<K> {
   public:
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
-      unsigned h = 0;
+      unsigned h = keylen;
 
       for (unsigned i = 0; i < keylen; i++) {
         h += p[i];
@@ -155,7 +157,7 @@ class HashFunctionXor : public HashFunction<K> {
   public:
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
-      unsigned h = 0;
+      unsigned h = keylen;
 
       for (unsigned i = 0; i < keylen; i++) {
          h ^= p[i];
@@ -182,7 +184,7 @@ class HashFunctionRot : public HashFunction<K> {
   public:
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
-      unsigned h = 0;
+      unsigned h = keylen;
 
       for (unsigned i = 0; i < keylen; i++) {
         h = (h << 4) ^ (h >> 28) ^ p[i];
@@ -216,7 +218,7 @@ class HashFunctionBernstein : public HashFunction<K> {
   public:
     unsigned operator()(const K& key, unsigned keylen) const {
       const unsigned char *p = (const unsigned char *)(&key);
-      unsigned h = 0;
+      unsigned h = keylen;
 
       for (unsigned i = 0; i < keylen; i++) {
         h = 33 * h + p[i];
@@ -487,6 +489,29 @@ class HashFunctionJenkins : public HashFunction<K> {
   }
 };
 
+//Jenkins One-at-a-time hash
+//This is similar to the rotating hash,
+//but it actually mixes the internal state.
+template <typename K>
+class HashFunctionOneAtATime: public HashFunction<K> {
+  public:
+    unsigned operator()(const K& key, unsigned keylen) const {
+      const unsigned char *p = (const unsigned char *)(&key);
+      unsigned h = keylen;
+
+      for (unsigned i = 0; i < keylen; i++) {
+        h += p[i];
+        h += (h << 10);
+        h ^= (h >> 6);
+      }
+      h += (h << 3);
+      h ^= (h >> 11);
+      h += (h << 15);
+
+      return h;
+    }
+};
+
 template <typename K>
 unsigned
 HashFunctionJSW<K>::
@@ -550,12 +575,17 @@ hash_function_jenkins = *(new HashFunctionJenkins<K>());
 template <typename K>
 const HashFunction<K>&
 HashFunction<K>::
-default_hash_function = *(new HashFunctionJenkins<K>());
+default_hash_function = *(new HashFunctionOneAtATime<K>());
 
 template <typename K>
 const HashCompare<K>&
 HashCompare<K>::
 default_compare_function = *(new HashCompare<K>());
+
+template <typename K>
+const HashFunctionJenkinsOneAtATime<K>&
+HashFunction<K>::
+hash_function_jenkins_one_at_a_time = *new HashFunctionJenkinsOneAtATime<K>();
 
 } /* com */
 } /* goffersoft */
