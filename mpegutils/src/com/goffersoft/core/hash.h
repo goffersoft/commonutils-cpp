@@ -83,6 +83,7 @@ struct HashBucket {
 
   private:
     ListType list;
+    const HashType<K>& hash_type;
 
     const V* create_node(const K& key,
                          const V& value,
@@ -101,6 +102,7 @@ struct HashBucket {
     }
 
   public:
+    HashBucket(const HashType<K>& ht) : hash_type(ht) {}
     ListType* get_list() { return &list; }
 
    
@@ -109,13 +111,15 @@ struct HashBucket {
       IteratorType it_end = list.end();
       HashEntry<K, V>* node = nullptr;
       HashEntry<K, V>* prev= nullptr;
+      int cmp;
 
       for (; it != it_end; ++it) {
         node = *it;
-        if (key == node->get_key()) {
+        cmp = hash_type.compare()(node->get_key(), key); 
+        if (cmp == 0) {
           node->set_value(value);
           return nullptr;
-        } else if (key < node->get_key()) {
+        } else if (cmp > 0) {
           return create_node(key, value, prev);
         }
         prev = node;
@@ -128,12 +132,14 @@ struct HashBucket {
       IteratorType it_end = list.end();
       HashEntry<K, V>* node = nullptr;
       HashEntry<K, V>* prev = nullptr;
+      int cmp;
 
       for (; it != it_end; ++it) {
         node = *it;
-        if (key == (*it)->get_key()) {
+        cmp = hash_type.compare()(node->get_key(), key); 
+        if (cmp == 0) {
           return delete_node(node, prev);
-        } else if (key < (*it)->get_key()) {
+        } else if (cmp > 0) {
           break;
         }
         prev = node;
@@ -144,11 +150,15 @@ struct HashBucket {
     const V* get(const K& key) const {
       IteratorType it = list.begin();
       IteratorType it_end = list.end();
+      HashEntry<K, V>* node = nullptr;
+      int cmp;
 
       for (; it != it_end; ++it) {
-        if (key == (*it)->get_key()) {
-          return &(*it)->get_value();
-        } else if (key < (*it)->get_key()) {
+        node = *it;
+        cmp = hash_type.compare()(node->get_key(), key); 
+        if (cmp == 0) {
+          return &node->get_value();
+        } else if (cmp > 0) {
           break;
         }
       }
@@ -212,17 +222,27 @@ class Hash {
     unsigned num_buckets;
     HashType<K> hash_type;
     unsigned size;
-    HashBucket<K, V>* buckets;
+    HashBucket<K, V>** buckets;
 
   protected:
     inline void set_size(unsigned sz) { size = sz; }
     inline void incr_size() { size++; }
     inline void decr_size() { size--; }
     inline void set_num_buckets(unsigned nb) { num_buckets = nb; }
+
+    inline HashBucket<K, V>* get_or_create_hash_bucket(const K& key) const {
+      unsigned hash = hash_type.hash()(key, get_keylen<K>(key));
+      hash &= (get_num_buckets() - 1);
+      if(buckets[hash] == nullptr) {
+        buckets[hash] = new HashBucket<K, V>(hash_type);
+      }
+      return buckets[hash];
+    }
+
     inline HashBucket<K, V>* get_hash_bucket(const K& key) const {
       unsigned hash = hash_type.hash()(key, get_keylen<K>(key));
       hash &= (get_num_buckets() - 1);
-      return &buckets[hash];
+      return buckets[hash];
     }
 
   public:
@@ -242,10 +262,17 @@ class Hash {
         }
         num_buckets = j*2;
       }
-      buckets = new HashBucket<K, V>[num_buckets];
+      buckets = new HashBucket<K, V>*[num_buckets];
+      for(unsigned i = 0; i < num_buckets; i++) {
+        buckets[i] = nullptr;
+      }
     }
 
     ~Hash() {
+      for(unsigned i = 0; i < num_buckets; i++) {
+        if(buckets[i])
+          delete buckets[i];
+      }
       delete[] buckets;
     }
 
@@ -253,17 +280,23 @@ class Hash {
     inline unsigned get_num_buckets() const { return num_buckets; }
 
     void put(const K& key, const V& value) {
-     if(get_hash_bucket(key)->put(key, value) != nullptr) 
+     if(get_or_create_hash_bucket(key)->put(key, value) != nullptr) 
        incr_size();
     }
 
     void del(const K& key) {
-      if(get_hash_bucket(key)->del(key) != nullptr)
+      HashBucket<K, V>* bkt = get_hash_bucket(key);
+      if(bkt == nullptr)
+        return;
+      if(bkt->del(key) != nullptr)
         decr_size();
     }
  
     V* get(const K& key) {
-      return (V*)get_hash_bucket(key)->get(key);
+      HashBucket<K, V>* bkt = get_hash_bucket(key);
+      if(bkt == nullptr)
+        return nullptr;
+      return (V*)(bkt->get(key));
     }
 
     V* operator [](const K& key) {
@@ -271,13 +304,19 @@ class Hash {
     }
 
     bool has_key(const K& key) const {
-      return get_hash_bucket(key)->has_key(key);
-    } 
+      HashBucket<K, V>* bkt = get_hash_bucket(key);
+      if(bkt == nullptr)
+        return false;
+      return bkt->has_key(key);
+    }
 
     SafeArray<const K*> get_keys() {
         K **array = new const K*[get_size()];
         unsigned offset = 0;
         for(int i = 0; i < get_num_buckets(); i++) {
+          if(buckets[i] == nullptr) {
+            continue;
+          }
           buckets[i]->get_keys(array, offset);
           offset += buckets[i]->get_size();
         }
@@ -288,6 +327,9 @@ class Hash {
         V **array = new const V*[get_size()];
         unsigned offset = 0;
         for(int i = 0; i < get_num_buckets(); i++) {
+          if(buckets[i] == nullptr) {
+            continue;
+          }
           buckets[i]->get_values(array, offset);
           offset += buckets[i]->get_size();
         }
