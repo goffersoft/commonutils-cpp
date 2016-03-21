@@ -1,4 +1,4 @@
-/**
+/** 
  **
  ** This file is part of <template>.
  **
@@ -15,43 +15,12 @@
  ** You should have received a copy of the GNU General Public License
  ** along with <template>. If not, see <http://www.gnu.org/licenses/>.
  **
- ** This file descrbes the HelloWorld class of the <template> project.
+ ** This file descrbes the object class of the <template> project.
  ** This class is the root class of all other classes.
  **/
-#ifndef __HELLO_WORLD__
-#define __HELLO_WORLD__
+#ifndef __MAIN_H__
+#define __MAIN_H__
 
-#include "object.h"
+int test_main(int argc, const char **argv);
 
-
-#ifdef __cplusplus
-namespace com {
-namespace goffersoft {
-namespace hello {
-
-extern "C" {
-#endif
-
-const char *hello_world();
-
-#ifdef __cplusplus
-}
-#endif
-
-using com::goffersoft::core::Object;
-
-class HelloWorld : public Object {
-    protected:
-        string to_string() const {
-            return string("Hello C++ World!");
-        }
-        
-};
-
-#ifdef __cplusplus
-} /* com */
-} /* goffersoft */
-} /* hello */
-#endif
-
-#endif /* __HELLO_WORLD__ */
+#endif /* __MAIN_H__ */
