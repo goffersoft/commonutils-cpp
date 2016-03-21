@@ -20,7 +20,6 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-extern int test_object_main(int argc, char **argv);
-extern int test_bioutils_main(int argc, char **argv);
+extern int test_main(int argc, const char **argv);
 
 #endif /* __MAIN_H__ */

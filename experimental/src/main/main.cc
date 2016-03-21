@@ -16,10 +16,26 @@
  ** along with goffersoft. If not, see <http://www.gnu.org/licenses/>.
  **
  **/
-#include <stdlib.h>
-#include "main.h"
+#include <string>
 
-int main(int argc, char **argv) {
-  test_object_main(0, NULL);
-  test_bioutils_main(0, NULL);
+#include "main.h"
+#include "utils.h"
+
+using com::goffersoft::core::utils;
+using std::string;
+using std::begin;
+using std::end;
+using std::equal;
+
+extern int hackerank_main(int argc, const char **argv);
+
+int main(int argc, const char **argv) {
+    if(argc > 1) {
+       string s(argv[1]);
+       if(equal(s.begin(), s.end(), begin("test"),
+                 utils::strequals_igncase)) {
+           return test_main(argc, argv);
+       }
+    } 
+    hackerank_main(argc , argv);
 }

@@ -1,0 +1,67 @@
+#include <String>
+
+using namespace std;
+
+class person {
+    private:
+      string name;
+      unsigned age;
+    
+    protected:
+      person(const string& name, unsigned age) {
+         this->name = name;
+         this->age = age;
+      }
+    
+    public:
+      const string& get_name() {
+          return name;
+      }
+    
+      unsigned get_age() {
+          return age;
+      }
+    
+    protected:
+      void set_name(const string& name) {
+          this->name = name;
+      }
+    
+      void set_age(unsigned age) {
+          this->age = age;
+      }
+};
+
+class student : public person {
+    private :
+      unsigned cur_id;
+      unsigned marks[6];
+      static unsigned id = 1;
+      unsigned get_next_id() { next_id++; }
+        
+    public:
+      void get_data() {
+          getline(cin);
+      }
+    
+      void set_data() {
+         
+      }
+};
+
+class professor : public person {
+    private:
+        static unsigned id = 1;
+        cur_id;
+        vector<string> publications;
+        unsigned get_next_id() { next_id++; }
+    
+    public:
+      void get_data() {
+          cin << 
+      }
+    
+      void set_data() {
+         
+      }
+};

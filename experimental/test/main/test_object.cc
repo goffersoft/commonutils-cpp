@@ -22,9 +22,9 @@
 
 using std::endl;
 using std::cout;
-using com::goffersoft::core::Object;
+using com::goffersoft::core::object;
 
-class A : public Object {
+class A : public object {
     private :
         int a;
  
@@ -33,7 +33,7 @@ class A : public Object {
             this->a = a;
         }
 
-        int cmp(const Object& obj) const {
+        int cmp(const object& obj) const {
             cout << "In A" << endl;
             if(((A *)(&obj))->a == a)
                 return 0;
@@ -53,7 +53,7 @@ class B : public A {
             this->b = b;
         }
 
-        int cmp(const Object& obj) const {
+        int cmp(const object& obj) const {
             cout << "In B" << endl;
             if(((B *)(&obj))->b == b)
                 return 0;
@@ -64,7 +64,7 @@ class B : public A {
         }
 };
 
-class C : public Object {
+class C : public object {
     private :
         string c;
  
@@ -73,7 +73,7 @@ class C : public Object {
             this->c = c;
         }
 
-        int cmp(const Object& obj) const {
+        int cmp(const object& obj) const {
             cout << "In C" << endl;
             if(((C *)(&obj))->c == c)
                 return 0;
@@ -91,11 +91,11 @@ int test_object_main (int argc, char **argv) {
     B b1(1);
     B b2(1);
     C c1("Hello World");
-    Object *obj1 = &a1;
-    Object *obj2 = &a2;
-    Object *obj3 = &b1;
-    Object *obj4 = &b2;
-    Object *obj5 = &c1;
+    object *obj1 = &a1;
+    object *obj2 = &a2;
+    object *obj3 = &b1;
+    object *obj4 = &b2;
+    object *obj5 = &c1;
 
     cout << string(*obj1) << " " << (*obj1 == *obj2) << endl;
     cout << string(*obj2) << " " << (*obj3 == *obj4) << endl;

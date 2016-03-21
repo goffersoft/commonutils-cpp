@@ -1,4 +1,5 @@
 # Ignore everything in this directory
 *.so
+mpegutils
 # Except this file
 !.gitignore

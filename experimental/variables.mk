@@ -7,8 +7,8 @@ endif
 
 export PLATFORM_LINUX = __OS_LINUX__
 export PLATFORM_MAC = __OS_MAC__
-export PLATFORM_OS = $(PLATFORM_LINUX)
-#export PLATFORM_OS = $(PLATFORM_MAC)
+#export PLATFORM_OS = $(PLATFORM_LINUX)
+export PLATFORM_OS = $(PLATFORM_MAC)
 
 #export INCLUDE_BOOST = 1
 export BOOSTDIRNAME = boost_1_57_0
@@ -20,8 +20,8 @@ export MAKETYPE := $(MAKETYPE_RECURSE)
 
 export LIBTYPE_AR = "AR"
 export LIBTYPE_SO = "SO"
-#export LIBTYPE = $(LIBTYPE_AR)
-export LIBTYPE = $(LIBTYPE_SO)
+export LIBTYPE = $(LIBTYPE_AR)
+#export LIBTYPE = $(LIBTYPE_SO)
 
 export SO_EXETYPE_SO = "SO"
 export SO_EXETYPE_EXE = "EXE"

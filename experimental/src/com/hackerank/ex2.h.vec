@@ -1,0 +1,143 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<unordered_map>
+
+using namespace std;
+
+class sparse_bitmap{
+  private:
+    typedef unsigned int vec_type;
+    vector<vec_type>& full_row = *new vector<vec_type>();
+    vector<vec_type>& invalid_key = *new vector<vec_type>(); 
+    int uniq_count = 0;
+
+    unordered_map<int, vector<vec_type>* >& bitmap =
+                *new unordered_map<int, vector<vec_type>* >();
+    const int vector_size = 65;
+    const int row_size = 64;
+    const int bits_per_vectype = sizeof(vec_type)*8;
+    const int bits_per_row = row_size*bits_per_vectype;
+
+    inline int get_rownum(int bitpos) {
+      return bitpos/bits_per_row;
+    }
+
+    inline int get_vec_rownum(int bitpos) {
+      return (bitpos%bits_per_row)/bits_per_vectype + 1;
+    }
+
+    inline int get_vec_colnum(int bitpos) {
+      /*cout << "bitpos=" << bitpos
+           << ": bitpos%bits_per_row=" << bitpos%bits_per_row
+           << ": bits_per_vectype=" << bits_per_vectype << endl;*/
+      return (bitpos%bits_per_row)%bits_per_vectype;
+    }
+
+    void set_bit(int bitpos, vector<vec_type>& r) {
+      if(r == invalid_key)
+        return;
+
+      if(r == full_row)
+        return;
+
+      int row = get_vec_rownum(bitpos) + 1;
+      int col = get_vec_colnum(bitpos);
+
+      /*cout << "slot " << get_rownum(bitpos)
+           << " row=" << row << " col=" << col
+           << " 0x" << hex << r[row] << dec << endl;*/
+
+      if((r[row] & (1 << col)) == (1 << col))
+        return;
+
+      r[row] |= (1 << col);
+      r[0] += 1;
+      uniq_count++;
+      //cout << " *uc=" << dec << uniq_count << endl;
+    }
+
+    int num_calls = 0;
+
+    bool is_bit_set(int bitpos, vector<vec_type>& r) {
+      if(r == invalid_key)
+        return false;
+
+      if(r == full_row)
+        return true;
+
+      int row = get_vec_rownum(bitpos);
+      int col = get_vec_colnum(bitpos);
+
+      return ((r[row] & (1<< col)) == (1 << col));
+    }
+
+    vector<vec_type>& get_or_create_row(int row, int bitpos) {
+      auto it = bitmap.find(row);
+      vector<vec_type>* v;
+
+      if(it == bitmap.end()) {
+        v = new vector<vec_type>(vector_size);
+        //cout << ++num_calls << " : Creating vector of size " << vector_size << endl;
+        (*v)[0] = 0;
+        bitmap[row] = v;
+        return *v;
+      }
+
+      v = ((*it).second);
+      //cout << "2" << v << endl;
+
+      if((v != &full_row) &&
+         ((*v)[0] == (bits_per_row - 1)) &&
+         (!is_bit_set(bitpos, *v))) {
+        bitmap[row] = &full_row;
+        delete v;
+        v = &full_row;
+        uniq_count++;
+      }
+      return *v;
+    }
+
+    vector<vec_type>& get_row(int row) {
+      auto it = bitmap.find(row);
+
+      if(it == bitmap.end())
+        return invalid_key;
+
+      return *((*it).second);
+    }
+
+  public:
+    sparse_bitmap() {
+    }
+
+    void set_bit(int bitpos) {
+      //cout << bitpos << ":"
+      //     << get_rownum(bitpos) << ":"
+      //     << col << ":"
+      //     << get_vec_rownum(col) << ":"
+      //     << get_vec_colnum(col) << endl;
+      set_bit(bitpos,
+              get_or_create_row(get_rownum(bitpos), bitpos));
+    }
+
+    bool is_bit_set(int bitpos) {
+      return is_bit_set(bitpos, get_row(get_rownum(bitpos)));
+    }
+
+    int num_bits_set() {
+      return uniq_count;
+  }
+ 
+  ~sparse_bitmap() {
+    vector<vec_type>* v;
+    for(auto it = bitmap.begin(); it != bitmap.end(); it++) {
+      v = (*it).second;
+      if(v == &full_row) continue;
+      delete v;
+    }
+    delete &full_row;
+    delete &invalid_key;
+    delete &bitmap;
+  }
+};
