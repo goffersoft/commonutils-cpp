@@ -18,14 +18,12 @@
  ** This file descrbes the object class of the <template> project.
  ** This class is the root class of all other classes.
  **/
-#ifndef __MAIN__
-#define __MAIN__
+#ifndef __MAIN_H__
+#define __MAIN_H__
 
 #include <stdlib.h>
 #include <iostream>
 
-extern int boost_test_main(int argc, char **argv);
-extern int alloc_test_main(int argc, char **argv);
-extern int list_test_main(int argc, char **argv);
+extern int test_main(int argc, const char **argv);
 
-#endif /* __MAIN__ */
+#endif /* __MAIN_H__ */

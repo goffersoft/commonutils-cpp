@@ -4,7 +4,7 @@
 #include <iterator>
 #include <algorithm>
 
-int boost_test_main(int argc, char **argv)
+int boost_test_main(int argc, const char **argv)
 {
   using namespace boost::lambda;
   typedef std::istream_iterator<int> in;

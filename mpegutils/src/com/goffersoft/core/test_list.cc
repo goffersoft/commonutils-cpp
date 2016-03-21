@@ -262,7 +262,7 @@ void list_test_slist() {
   delete link6;
 }
 
-int list_test_main (int argc, char **argv) {
+int list_test_main (int argc, const char **argv) {
   cout << "**Test SLink : " << endl;
   list_test_slink<TestSLink>();
 

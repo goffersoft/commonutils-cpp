@@ -135,7 +135,7 @@ int func(int a[], int size) {
   return size;
 }
 
-int alloc_test_main(int argc, char** argv) {
+int alloc_test_main(int argc, const char** argv) {
   int *i = new int(10);
   int *j = new int(20);
   string *s = new string("Hello World");
