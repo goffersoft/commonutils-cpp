@@ -43,6 +43,7 @@
 #include <sstream>
 #include <string>
 #include <array>
+#include <memory>
 
 #include "except.h"
 #include "utils.h"

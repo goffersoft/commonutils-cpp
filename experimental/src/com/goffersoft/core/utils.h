@@ -25,6 +25,7 @@
 #include<cctype>
 #include<type_traits>
 #include<functional>
+#include<memory>
 
 namespace com {
 namespace goffersoft {

@@ -148,8 +148,7 @@ class hrml_parser {
     ostream& os;
     stack<token<char>* > tokens = stack<token<char>* >();
     stack<string*> values = stack<string*>();
-    unordered_map<string, tag*> objectmap =
-               unordered_map<string, tag*>();
+    unordered_map<string, tag*> objectmap;
 
     vector<token<char> > src_tokens = {
       pair_token<char>('<', '>', 1),
@@ -164,7 +163,7 @@ class hrml_parser {
     };
 
     static bool is_token(char c, vector<token<char> >& tarray, token<char>*& tok) {
-      for(int i = 0; i < tarray.size(); i++) {
+      for(uint32_t i = 0; i < tarray.size(); i++) {
         if(tarray[i].get_token() == c) {
           tok = &tarray[i];
           //cout << "?*" << tok->get_token() << " "; 
@@ -205,7 +204,7 @@ class hrml_parser {
       return is_token(c, src_tokens, tok);
     }
 
-    bool get_next_token_or_value(const string& input, int& offset,
+    bool get_next_token_or_value(const string& input, uint32_t& offset,
                                  token<char>*& tok, string*& val,
                                  vector<token<char> >& tarray)
     {
@@ -265,7 +264,7 @@ class hrml_parser {
       const string* attrval;
       string* k;
       string* v;
-      int offset = 0;
+      uint32_t offset = 0;
       tag *child;
       tag *thistag;
       tag::attr_type *a;

@@ -6,42 +6,43 @@ using namespace std;
 
 class sparse_bitmap{
   private:
-    typedef unsigned int vec_type;
-    typedef unsigned int* p_vec_type;
+    using vec_type = uint32_t;
+    using p_vec_type = vec_type*;
+
     p_vec_type full_row = new vec_type;
     p_vec_type invalid_key = new vec_type;
-    int uniq_count = 0;
+    uint32_t uniq_count = 0;
 
-    unordered_map<int, p_vec_type > bitmap = unordered_map<int, p_vec_type >();
-    const int vector_size = 4096;
-    const int row_size = 4095;
-    const int bits_per_vectype = sizeof(vec_type)*8;
-    const int bits_per_row = row_size*bits_per_vectype;
+    unordered_map<uint32_t, p_vec_type> bitmap;// = unordered_map<uint32_t, p_vec_type>();
+    const uint32_t vector_size = 4096;
+    const uint32_t row_size = 4095;
+    const uint32_t bits_per_vectype = sizeof(vec_type)*8;
+    const uint32_t bits_per_row = row_size*bits_per_vectype;
 
-    inline int get_rownum(int bitpos) {
+    inline uint32_t get_rownum(uint32_t bitpos) {
       return bitpos/bits_per_row;
     }
 
-    inline int get_vec_rownum(int bitpos) {
+    inline uint32_t get_vec_rownum(uint32_t bitpos) {
       return (bitpos%bits_per_row)/bits_per_vectype + 1;
     }
 
-    inline int get_vec_colnum(int bitpos) {
+    inline uint32_t get_vec_colnum(uint32_t bitpos) {
       /*cout << "bitpos=" << bitpos
            << ": bitpos%bits_per_row=" << bitpos%bits_per_row
            << ": bits_per_vectype=" << bits_per_vectype << endl;*/
       return (bitpos%bits_per_row)%bits_per_vectype;
     }
 
-    void set_bit(int bitpos, p_vec_type r) {
+    void set_bit(uint32_t bitpos, p_vec_type r) {
       if(r == invalid_key)
         return;
 
       if(r == full_row)
         return;
 
-      int row = get_vec_rownum(bitpos);
-      int col = get_vec_colnum(bitpos);
+      uint32_t  row = get_vec_rownum(bitpos);
+      uint32_t  col = get_vec_colnum(bitpos);
       
       /*cout << "slot " << get_rownum(bitpos)
            << " row=" << row << " col=" << col
@@ -50,12 +51,11 @@ class sparse_bitmap{
       if(row == 0 || row >= vector_size)
         cout << "bad row value row=" << row << " vec_size=" << vector_size << endl; 
 
-      if(col < 0 || col >= bits_per_vectype)
+      if(col == 0 || col >= bits_per_vectype)
         cout << "bad col value=" << col << endl;  
 
-      if((r[row] & (1 << col)) == (1 << col))
+      if((r[row] & ((uint32_t)1 << col)) == ((uint32_t)1 << col))
         return;
-
       
       r[row] |= (1 << col);
       r[0] += 1;
@@ -66,20 +66,20 @@ class sparse_bitmap{
 
     int num_calls = 0;
 
-    bool is_bit_set(int bitpos, p_vec_type r) {
+    bool is_bit_set(uint32_t bitpos, p_vec_type r) {
       if(r == invalid_key)
         return false;
 
       if(r == full_row)
         return true;
 
-      int row = get_vec_rownum(bitpos);
-      int col = get_vec_colnum(bitpos);
+      uint32_t row = get_vec_rownum(bitpos);
+      uint32_t col = get_vec_colnum(bitpos);
 
-      return ((r[row] & (1<< col)) == (1 << col));
+      return ((r[row] & ((uint32_t)1<< col)) == ((uint32_t)1 << col));
     }
 
-    p_vec_type get_or_create_row(int row, int bitpos) {
+    p_vec_type get_or_create_row(uint32_t row, uint32_t bitpos) {
       auto it = bitmap.find(row);
       p_vec_type v;
 
@@ -124,7 +124,7 @@ class sparse_bitmap{
     sparse_bitmap() {
     }
 
-    void set_bit(int bitpos) {
+    void set_bit(uint32_t bitpos) {
       //cout << bitpos << ":"
       //     << get_rownum(bitpos) << ":"
       //     << col << ":"
@@ -134,7 +134,7 @@ class sparse_bitmap{
               get_or_create_row(get_rownum(bitpos), bitpos));
     }
 
-    bool is_bit_set(int bitpos) {
+    bool is_bit_set(uint32_t bitpos) {
       return is_bit_set(bitpos, get_row(get_rownum(bitpos)));
     }
 
