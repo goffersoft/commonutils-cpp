@@ -13,7 +13,7 @@
  ** GNU General Public License for more details.
  **
  ** You should have received a copy of the GNU General Public License
- ** along with tremplate. If not, see <http://www.gnu.org/licenses/>.
+ ** along with template. If not, see <http://www.gnu.org/licenses/>.
  **
  ** this file describes the classes that are used for implementing a
  ** unit test framework
@@ -44,6 +44,7 @@
 #include <string>
 #include <array>
 #include <memory>
+#include <exception>
 
 #include "except.h"
 #include "utils.h"
@@ -68,6 +69,7 @@ using std::endl;
 using std::stringstream;
 using std::streambuf;
 using std::array;
+using std::exception;
 
 using com::goffersoft::core::not_implemented_error;
 
@@ -104,7 +106,47 @@ class test {
         static T* get_raw(const T& t) {
             return nullptr;
         }
-        
+
+        template <typename T>
+        static void print_array_msg(const T& expected,
+                                    const T& actual,
+                                    ostream& os,
+                                    const string &msg,
+                                    bool fail_msg,
+                                    uint32_t num_cols = 16) {
+            if(fail_msg) {
+                os << ws_ts_prefix << msg << endl
+                   << ws_r_prefix
+                   << "expected: "<< endl
+                   << ws_r_prefix;
+
+                uint32_t i = 0;
+                for(const auto& e : expected) {
+                    if ((i != 0) and (i % num_cols == 0))
+                        os << endl << ws_r_prefix;
+                    os << e << " "; 
+                    i++;
+                }
+                os << endl;
+
+                os << ws_ts_prefix << msg << endl
+                   << ws_r_prefix
+                   << "actual: "<< endl
+                   << ws_r_prefix;
+
+                i = 0;
+                for(const auto& a : actual) {
+                    if ((i != 0) and (i % num_cols == 0))
+                        os << endl << ws_r_prefix;
+                    os << a << " "; 
+                    i++;
+                }
+                os << endl;
+            } else {
+                os << ws_ts_prefix << msg << endl;
+            }
+        }
+
         template <typename T>
         static void print_msg(const T& expected,
                               const T& actual,
@@ -139,6 +181,7 @@ class test {
         using decision_func = bool();
         using cap_func = void();
         using mock_func = void();
+        using exp_func = void();
 
         static const string& noname;
 
@@ -210,6 +253,36 @@ class test {
         }
 
         template <typename T>
+        static bool ccassert_exception(
+                             const T& exp,
+                             const function<exp_func>& efunc,
+                             ostream& os = cout,
+                             const string& fail_msg = "test failed",
+                             const string& pass_msg = "test_passed") {
+            try {
+                efunc();
+                stringstream exp;
+                exp << "expected exception of type " << typeid(exp).name() << endl;
+                print_msg(exp.str(),
+                          string("no exception was thrown"),
+                          os, fail_msg, true);
+                return false;
+            } catch(T& e) {
+                os << ws_ts_prefix << pass_msg << endl; 
+                return true;
+            } catch(exception& e) {
+                stringstream exp;
+                stringstream act;
+                exp << "expected exception of type " << typeid(exp).name() << endl;
+                act << "got exception of type " << typeid(e).name() <<endl;
+                print_msg(exp.str(),
+                          act.str(),
+                          os, fail_msg, true);
+                return false;
+            }
+        }
+
+        template <typename T>
         static bool ccassert_equals(
                  const T& expected,
                  const T& actual,
@@ -248,7 +321,107 @@ class test {
                 return true;
             }
         }
-       
+
+        template <typename A>
+        static bool ccassert_array_equals(
+                 const A& expected,
+                 const A& actual,
+                 const function<bool(typename A::const_reference,
+                                     typename A::const_reference)>& cmp_func,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            bool retval;
+
+            retval = equal(begin(actual), end(actual), begin(expected), cmp_func);
+
+            if (!retval) {
+                print_array_msg(expected,
+                          actual,
+                          os, fail_msg, true);
+                return false;
+            } else {
+                print_array_msg(expected,
+                          actual,
+                          os, pass_msg, false);
+                return true;
+            }
+        }
+
+        template <typename A>
+        static bool ccassert_array_equals(
+                 const A& expected,
+                 const A& actual,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            bool retval;
+
+            retval = equal(begin(actual), end(actual), begin(expected));
+
+            if (!retval) {
+                print_array_msg(expected,
+                          actual,
+                          os, fail_msg, true);
+                return false;
+            } else {
+                print_array_msg(expected,
+                          actual,
+                          os, pass_msg, false);
+                return true;
+            }
+        }
+
+        template <typename A>
+        static bool ccassert_array_notequals(
+                 const A& expected,
+                 const A& actual,
+                 const function<bool(typename A::const_reference,
+                                     typename A::const_reference)>& cmp_func,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            bool retval;
+
+            retval = equal(begin(actual), end(actual), begin(expected), cmp_func);
+
+            if (retval) {
+                print_array_msg(expected,
+                          actual,
+                          os, fail_msg, true);
+                return false;
+            } else {
+                print_array_msg(expected,
+                          actual,
+                          os, pass_msg, false);
+                return true;
+            }
+        }
+
+        template <typename A>
+        static bool ccassert_array_notequals(
+                 const A& expected,
+                 const A& actual,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            bool retval;
+
+            retval = equal(begin(actual), end(actual), begin(expected));
+
+            if (retval) {
+                print_array_msg(expected,
+                          actual,
+                          os, fail_msg, true);
+                return false;
+            } else {
+                print_array_msg(expected,
+                          actual,
+                          os, pass_msg, false);
+                return true;
+            }
+        }
+
         static void capture_ostream(ostream& os,
                                     ostream& oscap,
                                     const function<cap_func>& cfunc) {
