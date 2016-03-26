@@ -23,9 +23,12 @@
 #define __UTILS_H__
 
 #include<cctype>
+#include<cmath>
+#include<limits>
 #include<type_traits>
 #include<functional>
 #include<memory>
+#include<iostream>
 
 namespace com {
 namespace goffersoft {
@@ -34,8 +37,12 @@ namespace core {
 using std::shared_ptr;
 using std::is_integral;
 using std::is_unsigned;
+using std::is_floating_point;
 using std::is_same;
 using std::function;
+using std::numeric_limits;
+using std::isnan;
+using std::isinf;
 
 class utils {
     public :
@@ -66,7 +73,53 @@ class utils {
                        return tmp;
                    };
         }
+
+        template<typename T>
+        static bool equal_xfld(const T& lhs,
+                               const T& rhs,
+                               const T epsilon = numeric_limits<T>::epsilon()) {
+            static_assert(is_floating_point<T>::value,
+                          "T must be one of float, double or long double");
+            if( isnan(lhs) && isnan(rhs) )
+                return true; 
+            else if( isinf(lhs) && isinf(rhs) )
+                return true;
+            else if(isinf(lhs) || isinf(rhs) ||
+                    isnan(lhs) || isnan(rhs))
+                return false;
+
+            const T diff = (lhs - rhs);
+
+            return ((diff >= -epsilon) && (diff <= epsilon));
+        }
+
+        template<typename T>
+        static bool cmp_equal(const T& lhs,
+                              const T& rhs,
+                              const T epsilon = numeric_limits<T>::epsilon()) {
+            return (lhs == rhs);
+        }
+
 };
+
+
+template<>
+bool utils::cmp_equal<float> (
+        const float& lhs,
+        const float& rhs,
+        const float epsilon);
+
+template<>
+bool utils::cmp_equal<double> (
+        const double& lhs,
+        const double& rhs,
+        const double epsilon);
+
+template<>
+bool utils::cmp_equal<long double> (
+        const long double& lhs,
+        const long double& rhs,
+        const long double epsilonn);
 
 } //com
 } //goffersoft
