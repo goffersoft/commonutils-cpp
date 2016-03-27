@@ -553,8 +553,6 @@ class testcase {
         using VecType = vector<TPtrType>;
         using VecPtrType = shared_ptr<VecType>;
 
-        static const string ws_tc_prefix;
-        static const string ws_t_prefix;
         uint32_t id;
         string name;
         VecPtrType list_of_tests;
@@ -566,6 +564,9 @@ class testcase {
         static IdFuncType get_next_id;
 
     public :
+        static const string ws_tc_prefix;
+        static const string ws_t_prefix;
+
         testcase(const string& tcname = noname) {
             list_of_tests = VecPtrType(new VecType());
             id = get_next_id();
@@ -593,20 +594,19 @@ class testcase {
 
         virtual void run(ostream& os = cout) {
             num_tests = list_of_tests->size();
-            os << ws_tc_prefix
-               << "Running Test Case #"
-               << id << "," << name << endl;
+            uint32_t tnum = 1;
             for(auto& t : *list_of_tests) {
                 os << ws_t_prefix
-                   << "Running Test #"
-                   << t->get_id() << ","
-                   << t->get_name() << endl;
+                   << "Running Test #" << tnum
+                   << '(' << t->get_id()
+                   << ',' << t->get_name() << ')' << endl;
                 bool status = ((t->get_test())());
                 if(status) {
                     num_tests_passed++;
                 } else {
                     num_tests_failed++;
                 }
+                tnum++;
             }
         }
         
@@ -622,10 +622,17 @@ class testcase {
             return num_tests;
         }
 
+        uint32_t get_id() {
+            return id;
+        }
+
+        const string& get_name() {
+            return name;
+        }
+
+
         void print_report(ostream& os = cout) {
-            os << ws_tc_prefix 
-               << "TestCase(" << id << ',' << name << ") : " << endl
-               << ws_t_prefix << "Report(Total/Pass/Fail) : ("
+            os << ws_t_prefix << "Report(Total/Pass/Fail) : ("
                << num_tests << "/"
                << num_tests_passed << "/"
                << num_tests_failed << ")" << endl;
@@ -649,12 +656,12 @@ class testsuite {
         uint32_t num_tests_failed = 0;
         uint32_t num_tests = 0;
 
-        static const string ws_ts_prefix;
-        static const string ws_tc_prefix;
         static const string& noname;
         static IdFuncType get_next_id;
 
     public :
+        static const string ws_ts_prefix;
+
         testsuite(const string& tsname = noname) {
             list_of_testcases = VecPtrType(new VecType());
             id = get_next_id();
@@ -674,14 +681,17 @@ class testsuite {
         }
 
         virtual void run(ostream& os = cout) {
-            os << ws_ts_prefix
-               << "Running Test Suite #"
-               << id << "," << name << endl;
+            uint32_t tcnum = 1;
             for(auto& tc : *list_of_testcases) {
+                os << testcase::ws_tc_prefix
+                   << "Running Test Case #" << tcnum
+                   << '(' << tc->get_id()
+                   << ',' << tc->get_name() << ')' << endl;
                 tc->run(os);
                 num_tests_passed += tc->get_num_tests_passed();
                 num_tests_failed += tc->get_num_tests_failed();
                 num_tests += tc->get_num_tests();
+                tcnum++;
             }
         }
 
@@ -696,23 +706,35 @@ class testsuite {
         uint32_t get_num_tests() {
             return num_tests;
         }
+
+        uint32_t get_id() {
+            return id;
+        }
+
+        const string& get_name() {
+            return name;
+        }
+
         void print_report(ostream& os = cout) {
-            os << ws_ts_prefix 
-               << "TestSuite(" << id << ',' << name << ") : " << endl
-               << ws_tc_prefix
+            os << testcase::ws_tc_prefix
                << "Report(Total/Pass/Fail) : ("
                << num_tests << "/"
                << num_tests_passed << "/"
                << num_tests_failed << ")" << endl;
-            for(auto& ts : *list_of_testcases) {
-                ts->print_report();
+            uint32_t tcnum = 1;
+            for(auto& tc : *list_of_testcases) {
+                os << testcase::ws_tc_prefix 
+                   << "TestCase #" << tcnum
+                   << '(' << tc->get_id() << ','
+                   << tc->get_name() << ") : " << endl;
+                tc->print_report();
+                tcnum++;
             }
         }
 };
 
 class codeclean {
     private :
-        static const string ws_prefix;
         using TsPtrType = unique_ptr<testsuite>;
         using VecType = vector<TsPtrType>;
         using VecPtrType = shared_ptr<VecType>;
@@ -724,6 +746,8 @@ class codeclean {
         uint32_t num_tests = 0;
 
     public :
+        static const string ws_prefix;
+
         codeclean() {
             list_of_testsuites = VecPtrType(new VecType());
         }
@@ -736,11 +760,17 @@ class codeclean {
 
         virtual void run(ostream& os = cout) {
             os << ws_prefix << "Running Tests" << endl;
+            uint32_t tsnum = 1;
             for(auto& ts : *list_of_testsuites) {
+                os << testsuite::ws_ts_prefix
+                   << "Running Test Suite #" << tsnum
+                   << '(' << ts->get_id()
+                   << ',' << ts->get_name() << ')' << endl;
                 ts->run(os);
                 num_tests_passed += ts->get_num_tests_passed();
                 num_tests_failed += ts->get_num_tests_failed();
                 num_tests += ts->get_num_tests();
+                tsnum++;
             }
         }
 
@@ -750,8 +780,14 @@ class codeclean {
                << num_tests << "/"
                << num_tests_passed << "/"
                << num_tests_failed << ")" << endl;
+            uint32_t tsnum = 1;
             for(auto& ts : *list_of_testsuites) {
+                os << testsuite::ws_ts_prefix 
+                   << "TestSuite #" << tsnum
+                   << '(' << ts->get_id() << ','
+                   << ts->get_name() << ") : " << endl;
                 ts->print_report();
+                tsnum++;
             }
         }
 };

@@ -58,7 +58,6 @@ const string&  testsuite::noname = "ts-noname";
 
 const string codeclean::ws_prefix = string(0, ' ');
 const string testsuite::ws_ts_prefix = string(4, ' ');
-const string testsuite::ws_tc_prefix = string(8, ' ');
 const string testcase::ws_tc_prefix = string(8, ' ');
 const string testcase::ws_t_prefix = string(12, ' ');
 const string test::ws_ts_prefix = string(16, ' ');
