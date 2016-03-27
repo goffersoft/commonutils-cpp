@@ -359,7 +359,7 @@ class test {
         static bool ccassert_array_equals(
                  const A& expected,
                  const A& actual,
-                 const cmp_func<typename A::const_reference> cfunc,
+                 const cmp_func<typename A::value_type> cfunc,
                  ostream& os = cout,
                  const string& fail_msg = "test failed",
                  const string& pass_msg = "test_passed") {
@@ -379,8 +379,8 @@ class test {
                  const string& fail_msg = "test failed",
                  const string& pass_msg = "test_passed") {
             static_assert(
-               !is_floating_point<typename A::const_reference>::value,
-               "A::const_reference must not be one of "
+               (!is_floating_point<typename A::value_type>::value),
+               "A::value_type must not be one of "
                "float, double or long double");
 
             bool retval;
@@ -401,15 +401,15 @@ class test {
             bool retval;
 
             static_assert(
-               is_floating_point<typename A::const_reference>::value,
-               "A::const_reference must be one of "
+               is_floating_point<typename A::value_type>::value,
+               "A::value_type must be one of "
                "float, double or long double");
 
             retval = equal(begin(actual),
                            end(actual),
                            begin(expected),
-                           [](typename A::const_reference lhs,
-                              typename A::const_reference rhs) {
+                           [](const typename A::value_type& lhs,
+                              const typename A::value_type& rhs) {
                                return utils::cmp_equal(lhs, rhs);
                            });
 
@@ -421,7 +421,7 @@ class test {
         static bool ccassert_array_notequals(
                  const A& expected,
                  const A& actual,
-                 const cmp_func<typename A::const_reference> cfunc,
+                 const cmp_func<typename A::value_type> cfunc,
                  ostream& os = cout,
                  const string& fail_msg = "test failed",
                  const string& pass_msg = "test_passed") {
@@ -441,8 +441,8 @@ class test {
                  const string& fail_msg = "test failed",
                  const string& pass_msg = "test_passed") {
             static_assert(
-               !is_floating_point<typename A::const_reference>::value,
-               "A::const_reference must not be one of "
+               !is_floating_point<typename A::value_type>::value,
+               "A::value_type must not be one of "
                "float, double or long double");
 
             bool retval;
@@ -462,8 +462,8 @@ class test {
                  const string& fail_msg = "test failed",
                  const string& pass_msg = "test_passed") {
             static_assert(
-               is_floating_point<typename A::const_reference>::value,
-               "A::const_reference must be one of "
+               is_floating_point<typename A::value_type>::value,
+               "A::value_type must be one of "
                "float, double or long double");
 
             bool retval;
@@ -471,8 +471,8 @@ class test {
             retval = equal(begin(actual),
                            end(actual),
                            begin(expected),
-                           [](typename A::const_reference lhs,
-                              typename A::const_reference rhs) {
+                           [](const typename A::value_type& lhs,
+                              const typename A::value_type& rhs) {
                                return utils::cmp_equal(lhs, rhs);
                            });
 
