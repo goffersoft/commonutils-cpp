@@ -1,6 +1,6 @@
 /** 
  **
- ** This file is part of eperimental.
+ ** This file is part of experimental.
  **
  ** experimental is free software: you can redistribute it and/or modify
  ** it under the terms of the GNU General Public License as published by
@@ -46,6 +46,7 @@
 #include <memory>
 #include <exception>
 #include <type_traits>
+#include <iomanip>
 
 #include "except.h"
 #include "utils.h"
@@ -72,6 +73,8 @@ using std::streambuf;
 using std::array;
 using std::exception;
 using std::is_floating_point;
+using std::numeric_limits;
+using std::setprecision;
 
 using com::goffersoft::core::not_implemented_error;
 using com::goffersoft::core::utils;
@@ -127,7 +130,9 @@ class test {
                 for(const auto& e : expected) {
                     if ((i != 0) and (i % num_cols == 0))
                         os << endl << ws_r_prefix;
-                    os << e << " "; 
+                    os << setprecision(
+                             numeric_limits<typename T::value_type>::max_digits10)
+                       << e << " "; 
                     i++;
                 }
                 os << endl;
@@ -141,7 +146,9 @@ class test {
                 for(const auto& a : actual) {
                     if ((i != 0) and (i % num_cols == 0))
                         os << endl << ws_r_prefix;
-                    os << a << " "; 
+                    os << setprecision(
+                             numeric_limits<typename T::value_type>::max_digits10)
+                       << a << " "; 
                     i++;
                 }
                 os << endl;
@@ -164,7 +171,8 @@ class test {
                     exp = tmp;
                     act = get_raw(actual);
                 }
-                os << ws_ts_prefix << msg << endl
+                os << setprecision(numeric_limits<T>::max_digits10)
+                   << ws_ts_prefix << msg << endl
                    << ws_r_prefix
                    << "expected: "<< *exp << endl
                    << ws_r_prefix
