@@ -47,9 +47,9 @@ using com::goffersoft::codeclean::testcase;
 using com::goffersoft::codeclean::test;
 using com::goffersoft::core::utils;
 
-testsuite::IdFuncType testsuite::get_next_id = utils::uniqid((uint32_t)1);
-testcase::IdFuncType testcase::get_next_id = utils::uniqid((uint32_t)1);
-test::IdFuncType test::get_next_id = utils::uniqid((uint32_t)1);
+testsuite::id_func_type testsuite::get_next_id = utils::uniqid((uint32_t)1);
+testcase::id_func_type testcase::get_next_id = utils::uniqid((uint32_t)1);
+test::id_func_type test::get_next_id = utils::uniqid((uint32_t)1);
 
 const string&  test::noname = "t-noname";
 const string&  testcase::noname = "tc-noname";

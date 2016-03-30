@@ -24,15 +24,15 @@
  **         testcase classes.
  **            a) member function to add a testcase
  **
- **      3) each testcase class is made of a vector of testcases
+ **      3) each testcase class is made of a vector of tests
  **            a) member functions to add a test
  **
  **      4) two ways of creating a test class
  **           a) public derivation from base test class
  **                 1) must override clone
- **                 2) must override run function (code goes here)
+ **                 2) must override run function (test code goes here)
  **           b) create a function object(std::function, std::bind)
- **              of type bool(boid)
+ **              of type bool(void)
  ** 
  **/
 #ifndef __CODECLEAN__
@@ -81,17 +81,332 @@ using com::goffersoft::core::utils;
 
 class test {
     public:
-        using TestFuncType = function<bool(void)>;
-        using IdFuncType = function<uint32_t(void)>;
+        using test_func_type = function<bool(void)>;
+        using id_func_type = function<uint32_t(void)>;
+        using decision_func_type = test_func_type;
+        using capture_func_type = function<void(void)>;
+        using mock_func_type = function<void(void)>;
+        using exception_func_type = function<void(void)>;
+        template<typename T>
+        using cmp_func_type = function<bool(const T&, const T&)>;
+
+        static const string& noname;
+
+        test(const string& tname = noname) :
+                        test(nullptr, tname) {}
+
+        test(const test_func_type& tf,
+             const string& tname = noname) {
+            name = tname;
+            id = get_next_id();
+            test_func = tf; 
+            if(&tname == &noname) {
+                stringstream ss;
+                ss << "test-" << id;
+                name = ss.str();
+            } else {
+                name = tname;
+            }
+        }
+
+        const test_func_type& get_test() {
+            if(test_func == nullptr) {
+                test_func = bind(&test::run, this);
+            }
+            return test_func;
+        }
+
+        uint32_t get_id() {
+            return id;
+        }
+
+        const string& get_name() {
+            return name;
+        }
+
+        virtual test& clone() const {
+            throw not_implemented_error("must override in derived class");
+        }
+
+        virtual bool run() {
+            throw not_implemented_error("must override in derived class");
+        }
+
+        static bool ccassert(bool val,
+                             const string& msg = "test failed",
+                             ostream& os = cout,
+                             const string& fail_msg = "test failed",
+                             const string& pass_msg = "test_passed") {
+            if(!val) {
+                os << ws_ts_prefix << fail_msg << endl; 
+                return false;
+            } else {
+                os << ws_ts_prefix << pass_msg << endl; 
+                return true;
+            }
+        }
+
+        static bool ccassert(const decision_func_type& dfunc,
+                             ostream& os = cout,
+                             const string& fail_msg = "test failed",
+                             const string& pass_msg = "test_passed") {
+            if(!dfunc()) {
+                os << ws_ts_prefix << fail_msg << endl; 
+                return false;
+            } else {
+                os << ws_ts_prefix << pass_msg << endl; 
+                return true;
+            }
+        }
+
+        template <typename T>
+        static bool ccassert_exception(
+                             const T& exp,
+                             const exception_func_type& efunc,
+                             ostream& os = cout,
+                             const string& fail_msg = "test failed",
+                             const string& pass_msg = "test_passed") {
+            try {
+                efunc();
+                stringstream exp;
+                exp << "expected exception of type " << typeid(exp).name() << endl;
+                print_msg(exp.str(),
+                          string("no exception was thrown"),
+                          os, fail_msg, true);
+                return false;
+            } catch(T& e) {
+                os << ws_ts_prefix << pass_msg << endl; 
+                return true;
+            } catch(exception& e) {
+                stringstream exp;
+                stringstream act;
+                exp << "expected exception of type " << typeid(exp).name() << endl;
+                act << "got exception of type " << typeid(e).name() <<endl;
+                print_msg(exp.str(),
+                          act.str(),
+                          os, fail_msg, true);
+                return false;
+            }
+        }
+
+        template <typename T>
+        static bool ccassert_equals(
+                 const T& expected,
+                 const T& actual,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+
+            bool retval = utils::cmp_equal(expected, actual);
+
+            return analyze_result(retval, expected, actual,
+                                  os, pass_msg, fail_msg);
+        }
+
+        template <typename T>
+        static bool ccassert_not_equals(
+                 const T& expected,
+                 const T& actual,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            bool retval = utils::cmp_equal(expected, actual);
+
+            return analyze_result(!retval, expected, actual,
+                                  os, pass_msg, fail_msg);
+        }
+
+        template <typename A>
+        static bool ccassert_array_equals(
+                 const A& expected,
+                 const A& actual,
+                 const cmp_func_type<typename A::value_type> cfunc,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            bool retval;
+
+            retval = equal(begin(actual), end(actual), begin(expected), cfunc);
+
+            return analyze_array_result(retval, expected, actual,
+                                        os, pass_msg, fail_msg);
+        }
+
+        template <typename A>
+        static bool ccassert_array_equals(
+                 const A& expected,
+                 const A& actual,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            static_assert(
+               (!is_floating_point<typename A::value_type>::value),
+               "A::value_type must not be one of "
+               "float, double or long double");
+
+            bool retval;
+
+            retval = equal(begin(actual), end(actual), begin(expected));
+
+            return analyze_array_result(retval, expected, actual,
+                                        os, pass_msg, fail_msg);
+        }
+
+        template <typename A>
+        static bool ccassert_fp_array_equals(
+                 const A& expected,
+                 const A& actual,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            bool retval;
+
+            static_assert(
+               is_floating_point<typename A::value_type>::value,
+               "A::value_type must be one of "
+               "float, double or long double");
+
+            retval = equal(begin(actual),
+                           end(actual),
+                           begin(expected),
+                           [](const typename A::value_type& lhs,
+                              const typename A::value_type& rhs) {
+                               return utils::cmp_equal(lhs, rhs);
+                           });
+
+            return analyze_array_result(retval, expected, actual,
+                                        os, pass_msg, fail_msg);
+        }
+
+        template <typename A>
+        static bool ccassert_array_notequals(
+                 const A& expected,
+                 const A& actual,
+                 const cmp_func_type<typename A::value_type> cfunc,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            bool retval;
+
+            retval = equal(begin(actual), end(actual), begin(expected), cfunc);
+
+            return analyze_array_result(!retval, expected, actual,
+                                        os, pass_msg, fail_msg);
+        }
+
+        template <typename A>
+        static bool ccassert_array_notequals(
+                 const A& expected,
+                 const A& actual,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            static_assert(
+               !is_floating_point<typename A::value_type>::value,
+               "A::value_type must not be one of "
+               "float, double or long double");
+
+            bool retval;
+
+            retval = equal(begin(actual), end(actual), begin(expected));
+
+            return analyze_array_result(!retval, expected, actual,
+                                        os, pass_msg, fail_msg);
+
+        }
+
+        template <typename A>
+        static bool ccassert_fp_array_notequals(
+                 const A& expected,
+                 const A& actual,
+                 ostream& os = cout,
+                 const string& fail_msg = "test failed",
+                 const string& pass_msg = "test_passed") {
+            static_assert(
+               is_floating_point<typename A::value_type>::value,
+               "A::value_type must be one of "
+               "float, double or long double");
+
+            bool retval;
+
+            retval = equal(begin(actual),
+                           end(actual),
+                           begin(expected),
+                           [](const typename A::value_type& lhs,
+                              const typename A::value_type& rhs) {
+                               return utils::cmp_equal(lhs, rhs);
+                           });
+
+            return analyze_array_result(!retval, expected, actual,
+                                        os, pass_msg, fail_msg);
+
+        }
+
+        static void capture_ostream(ostream& os,
+                                    ostream& oscap,
+                                    const capture_func_type& cfunc) {
+            // save os's buffer
+            streambuf *sbuf = os.rdbuf();
+
+            // redirect os to the oscap's buffer
+            os.rdbuf(oscap.rdbuf());
+
+            //call func to execute ostream related cmds
+            cfunc();
+
+            // redirect os to its old self
+            os.rdbuf(sbuf);
+        }
+
+        static string capture_any(ostream& os,
+                                  const capture_func_type& cfunc) {
+            stringstream ostr;
+            capture_ostream(os, ostr, cfunc);
+            return ostr.str();
+        }
+
+        static string capture_stdout(const capture_func_type& cfunc) {
+            stringstream ostr;
+            capture_ostream(cout, ostr, cfunc);
+            return ostr.str();
+        }
+
+        static string capture_stderr(const capture_func_type& cfunc) {
+            stringstream ostr;
+            capture_ostream(cerr, ostr, cfunc);
+            return ostr.str();
+        }
+
+        static void mock_istream(istream& is,
+                                 istream& mockis,
+                                 const mock_func_type& mfunc) {
+            // save is's buffer
+            streambuf *sbuf = is.rdbuf();
+
+            // redirect is to the ismock's buffer
+            is.rdbuf(mockis.rdbuf());
+
+            //call func to execute istream related cmds
+            mfunc();
+
+            // redirect is to its old self
+            is.rdbuf(sbuf);
+        }
+
+        static void mock_stdin(istream& mockis,
+                                 const mock_func_type& mfunc) {
+            mock_istream(cin, mockis, mfunc);
+        }
 
     private:
-        uint32_t id;
-        string name;
-        TestFuncType test_func;
-        
+        static id_func_type get_next_id;
         static const string ws_ts_prefix;
         static const string ws_r_prefix;
         static const array<const char*, 256>& escs;
+
+        uint32_t id;
+        string name;
+        test_func_type test_func;
 
         static array<const char*, 256>& init_escs() {
             array<const char*, 256>& tmp = 
@@ -107,7 +422,7 @@ class test {
 
             return tmp;
         }
-
+        
         template<typename T>
         static T* get_raw(const T& t) {
             return nullptr;
@@ -225,350 +540,15 @@ class test {
                 return false;
             }
         }
-
-        static IdFuncType get_next_id;
-
-    public:
-        using decision_func = bool();
-        using cap_func = void();
-        using mock_func = void();
-        using exp_func = void();
-
-        template<typename T>
-        using cmp_func = function<bool(const T&, const T&)>;
-
-        static const string& noname;
-
-        test(const string& tname = noname) :
-                        test(nullptr, tname) {}
-
-        test(const TestFuncType& tf,
-             const string& tname = noname) {
-            name = tname;
-            id = get_next_id();
-            test_func = tf; 
-            if(&tname == &noname) {
-                stringstream ss;
-                ss << "test-" << id;
-                name = ss.str();
-            } else {
-                name = tname;
-            }
-        }
-
-        const TestFuncType& get_test() {
-            if(test_func == nullptr) {
-                test_func = bind(&test::run, this);
-            }
-            return test_func;
-        }
-
-        uint32_t get_id() {
-            return id;
-        }
-
-        const string& get_name() {
-            return name;
-        }
-
-        virtual test& clone() const {
-            throw not_implemented_error("must override in derived class");
-        }
-
-        virtual bool run() {
-            throw not_implemented_error("must override in derived class");
-        }
-
-        static bool ccassert(bool val,
-                             const string& msg = "test failed",
-                             ostream& os = cout,
-                             const string& fail_msg = "test failed",
-                             const string& pass_msg = "test_passed") {
-            if(!val) {
-                os << ws_ts_prefix << fail_msg << endl; 
-                return false;
-            } else {
-                os << ws_ts_prefix << pass_msg << endl; 
-                return true;
-            }
-        }
-
-        static bool ccassert(const function<decision_func>& dfunc,
-                             ostream& os = cout,
-                             const string& fail_msg = "test failed",
-                             const string& pass_msg = "test_passed") {
-            if(!dfunc()) {
-                os << ws_ts_prefix << fail_msg << endl; 
-                return false;
-            } else {
-                os << ws_ts_prefix << pass_msg << endl; 
-                return true;
-            }
-        }
-
-        template <typename T>
-        static bool ccassert_exception(
-                             const T& exp,
-                             const function<exp_func>& efunc,
-                             ostream& os = cout,
-                             const string& fail_msg = "test failed",
-                             const string& pass_msg = "test_passed") {
-            try {
-                efunc();
-                stringstream exp;
-                exp << "expected exception of type " << typeid(exp).name() << endl;
-                print_msg(exp.str(),
-                          string("no exception was thrown"),
-                          os, fail_msg, true);
-                return false;
-            } catch(T& e) {
-                os << ws_ts_prefix << pass_msg << endl; 
-                return true;
-            } catch(exception& e) {
-                stringstream exp;
-                stringstream act;
-                exp << "expected exception of type " << typeid(exp).name() << endl;
-                act << "got exception of type " << typeid(e).name() <<endl;
-                print_msg(exp.str(),
-                          act.str(),
-                          os, fail_msg, true);
-                return false;
-            }
-        }
-
-        template <typename T>
-        static bool ccassert_equals(
-                 const T& expected,
-                 const T& actual,
-                 ostream& os = cout,
-                 const string& fail_msg = "test failed",
-                 const string& pass_msg = "test_passed") {
-
-            bool retval = utils::cmp_equal(expected, actual);
-
-            return analyze_result(retval, expected, actual,
-                                  os, pass_msg, fail_msg);
-        }
-
-        template <typename T>
-        static bool ccassert_not_equals(
-                 const T& expected,
-                 const T& actual,
-                 ostream& os = cout,
-                 const string& fail_msg = "test failed",
-                 const string& pass_msg = "test_passed") {
-            bool retval = utils::cmp_equal(expected, actual);
-
-            return analyze_result(!retval, expected, actual,
-                                  os, pass_msg, fail_msg);
-        }
-
-        template <typename A>
-        static bool ccassert_array_equals(
-                 const A& expected,
-                 const A& actual,
-                 const cmp_func<typename A::value_type> cfunc,
-                 ostream& os = cout,
-                 const string& fail_msg = "test failed",
-                 const string& pass_msg = "test_passed") {
-            bool retval;
-
-            retval = equal(begin(actual), end(actual), begin(expected), cfunc);
-
-            return analyze_array_result(retval, expected, actual,
-                                        os, pass_msg, fail_msg);
-        }
-
-        template <typename A>
-        static bool ccassert_array_equals(
-                 const A& expected,
-                 const A& actual,
-                 ostream& os = cout,
-                 const string& fail_msg = "test failed",
-                 const string& pass_msg = "test_passed") {
-            static_assert(
-               (!is_floating_point<typename A::value_type>::value),
-               "A::value_type must not be one of "
-               "float, double or long double");
-
-            bool retval;
-
-            retval = equal(begin(actual), end(actual), begin(expected));
-
-            return analyze_array_result(retval, expected, actual,
-                                        os, pass_msg, fail_msg);
-        }
-
-        template <typename A>
-        static bool ccassert_fp_array_equals(
-                 const A& expected,
-                 const A& actual,
-                 ostream& os = cout,
-                 const string& fail_msg = "test failed",
-                 const string& pass_msg = "test_passed") {
-            bool retval;
-
-            static_assert(
-               is_floating_point<typename A::value_type>::value,
-               "A::value_type must be one of "
-               "float, double or long double");
-
-            retval = equal(begin(actual),
-                           end(actual),
-                           begin(expected),
-                           [](const typename A::value_type& lhs,
-                              const typename A::value_type& rhs) {
-                               return utils::cmp_equal(lhs, rhs);
-                           });
-
-            return analyze_array_result(retval, expected, actual,
-                                        os, pass_msg, fail_msg);
-        }
-
-        template <typename A>
-        static bool ccassert_array_notequals(
-                 const A& expected,
-                 const A& actual,
-                 const cmp_func<typename A::value_type> cfunc,
-                 ostream& os = cout,
-                 const string& fail_msg = "test failed",
-                 const string& pass_msg = "test_passed") {
-            bool retval;
-
-            retval = equal(begin(actual), end(actual), begin(expected), cfunc);
-
-            return analyze_array_result(!retval, expected, actual,
-                                        os, pass_msg, fail_msg);
-        }
-
-        template <typename A>
-        static bool ccassert_array_notequals(
-                 const A& expected,
-                 const A& actual,
-                 ostream& os = cout,
-                 const string& fail_msg = "test failed",
-                 const string& pass_msg = "test_passed") {
-            static_assert(
-               !is_floating_point<typename A::value_type>::value,
-               "A::value_type must not be one of "
-               "float, double or long double");
-
-            bool retval;
-
-            retval = equal(begin(actual), end(actual), begin(expected));
-
-            return analyze_array_result(!retval, expected, actual,
-                                        os, pass_msg, fail_msg);
-
-        }
-
-        template <typename A>
-        static bool ccassert_fp_array_notequals(
-                 const A& expected,
-                 const A& actual,
-                 ostream& os = cout,
-                 const string& fail_msg = "test failed",
-                 const string& pass_msg = "test_passed") {
-            static_assert(
-               is_floating_point<typename A::value_type>::value,
-               "A::value_type must be one of "
-               "float, double or long double");
-
-            bool retval;
-
-            retval = equal(begin(actual),
-                           end(actual),
-                           begin(expected),
-                           [](const typename A::value_type& lhs,
-                              const typename A::value_type& rhs) {
-                               return utils::cmp_equal(lhs, rhs);
-                           });
-
-            return analyze_array_result(!retval, expected, actual,
-                                        os, pass_msg, fail_msg);
-
-        }
-
-        static void capture_ostream(ostream& os,
-                                    ostream& oscap,
-                                    const function<cap_func>& cfunc) {
-            // save os's buffer
-            streambuf *sbuf = os.rdbuf();
-
-            // redirect os to the oscap's buffer
-            os.rdbuf(oscap.rdbuf());
-
-            //call func to execute ostream related cmds
-            cfunc();
-
-            // redirect os to its old self
-            os.rdbuf(sbuf);
-        }
-
-        static string capture_any(ostream& os, const function<cap_func>& cfunc) {
-            stringstream ostr;
-            capture_ostream(os, ostr, cfunc);
-            return ostr.str();
-        }
-
-        static string capture_stdout(const function<cap_func>& cfunc) {
-            stringstream ostr;
-            capture_ostream(cout, ostr, cfunc);
-            return ostr.str();
-        }
-
-        static string capture_stderr(const function<cap_func>& cfunc) {
-            stringstream ostr;
-            capture_ostream(cerr, ostr, cfunc);
-            return ostr.str();
-        }
-
-        static void mock_istream(istream& is,
-                                 istream& mockis,
-                                 const function<mock_func>& mfunc) {
-            // save is's buffer
-            streambuf *sbuf = is.rdbuf();
-
-            // redirect is to the ismock's buffer
-            is.rdbuf(mockis.rdbuf());
-
-            //call func to execute istream related cmds
-            mfunc();
-
-            // redirect is to its old self
-            is.rdbuf(sbuf);
-        }
-
-        static void mock_stdin(istream& mockis,
-                                 const function<mock_func>& mfunc) {
-            mock_istream(cin, mockis, mfunc);
-        }
 };
 
 class testcase {
-    public :
-        using IdFuncType = function<uint32_t(void)>;
-    private :
-        using TPtrType = unique_ptr<test>;
-        using VecType = vector<TPtrType>;
-        using VecPtrType = shared_ptr<VecType>;
-
-        uint32_t id;
-        string name;
-        VecPtrType list_of_tests;
-        static const string& noname;
-        uint32_t num_tests_passed = 0;
-        uint32_t num_tests_failed = 0;
-        uint32_t num_tests = 0;
-
-        static IdFuncType get_next_id;
-
     public :
         static const string ws_tc_prefix;
         static const string ws_t_prefix;
 
         testcase(const string& tcname = noname) {
-            list_of_tests = VecPtrType(new VecType());
+            list_of_tests = vector_pointer_type(new vector_type());
             id = get_next_id();
             if(&tcname == &noname) {
                 stringstream ss;
@@ -579,16 +559,16 @@ class testcase {
             }
         }
 
-        void add_test(const test::TestFuncType& tf,
+        void add_test(const test::test_func_type& tf,
                       const string& tname = test::noname) {
             list_of_tests->push_back(
-                  TPtrType(new test(tf, tname))
+                  test_pointer_type(new test(tf, tname))
                        );
         }
 
         void add_test(const test& t) {
             list_of_tests->push_back(
-                  TPtrType(&t.clone())
+                  test_pointer_type(&t.clone())
                        );
         }
 
@@ -637,33 +617,32 @@ class testcase {
                << num_tests_passed << "/"
                << num_tests_failed << ")" << endl;
         }
+
+    private :
+        using id_func_type = function<uint32_t(void)>;
+        using test_pointer_type = unique_ptr<test>;
+        using vector_type = vector<test_pointer_type>;
+        using vector_pointer_type = shared_ptr<vector_type>;
+
+        static const string& noname;
+        static id_func_type get_next_id;
+
+        uint32_t id;
+        string name;
+        vector_pointer_type list_of_tests;
+        uint32_t num_tests_passed = 0;
+        uint32_t num_tests_failed = 0;
+        uint32_t num_tests = 0;
+
 };
 
 
 class testsuite {
     public :
-        using IdFuncType = function<uint32_t(void)>;
-
-    private :
-        using TcPtrType = unique_ptr<testcase>;
-        using VecType = vector<TcPtrType>;
-        using VecPtrType = shared_ptr<VecType>;
-
-        uint32_t id;
-        string name;
-        VecPtrType list_of_testcases;
-        uint32_t num_tests_passed = 0;
-        uint32_t num_tests_failed = 0;
-        uint32_t num_tests = 0;
-
-        static const string& noname;
-        static IdFuncType get_next_id;
-
-    public :
         static const string ws_ts_prefix;
 
         testsuite(const string& tsname = noname) {
-            list_of_testcases = VecPtrType(new VecType());
+            list_of_testcases = vector_pointer_type(new vector_type());
             id = get_next_id();
             if(&tsname == &noname) {
                 stringstream ss;
@@ -676,7 +655,7 @@ class testsuite {
 
         void add_testcase(const testcase& tc) {
             list_of_testcases->push_back(
-                   TcPtrType(new testcase(tc))
+                   testcase_pointer_type(new testcase(tc))
                    );
         }
 
@@ -731,30 +710,36 @@ class testsuite {
                 tcnum++;
             }
         }
-};
 
-class codeclean {
     private :
-        using TsPtrType = unique_ptr<testsuite>;
-        using VecType = vector<TsPtrType>;
-        using VecPtrType = shared_ptr<VecType>;
+        using id_func_type = function<uint32_t(void)>;
+        using testcase_pointer_type = unique_ptr<testcase>;
+        using vector_type = vector<testcase_pointer_type>;
+        using vector_pointer_type = shared_ptr<vector_type>;
 
-        VecPtrType list_of_testsuites;
+        static const string& noname;
+        static id_func_type get_next_id;
+
+        uint32_t id;
         string name;
+        vector_pointer_type list_of_testcases;
         uint32_t num_tests_passed = 0;
         uint32_t num_tests_failed = 0;
         uint32_t num_tests = 0;
 
+};
+
+class codeclean {
     public :
         static const string ws_prefix;
 
         codeclean() {
-            list_of_testsuites = VecPtrType(new VecType());
+            list_of_testsuites = vector_pointer_type(new vector_type());
         }
 
         void add_testsuite(const testsuite& ts) {
             list_of_testsuites->push_back(
-                TsPtrType(new testsuite(ts))
+                testsuite_pointer_type(new testsuite(ts))
                       );
         }
 
@@ -790,6 +775,17 @@ class codeclean {
                 tsnum++;
             }
         }
+
+    private :
+        using testsuite_pointer_type = unique_ptr<testsuite>;
+        using vector_type = vector<testsuite_pointer_type>;
+        using vector_pointer_type = shared_ptr<vector_type>;
+
+        vector_pointer_type list_of_testsuites;
+        string name;
+        uint32_t num_tests_passed = 0;
+        uint32_t num_tests_failed = 0;
+        uint32_t num_tests = 0;
 };
 
 template<>
