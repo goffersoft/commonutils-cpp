@@ -31,79 +31,109 @@ namespace goffersoft {
 namespace core {
 
 class object {
+    public :
 
-  protected :
+        operator string() const {
+          return to_string();
+        }
 
-    object() {}
-    virtual ~object() {}
+        bool equals(const object& that) const {
+            if (typeid(*this) != typeid(that))
+                return false;
 
+            if(this == &that) 
+                return true; 
 
-    virtual int cmp(const object& obj) const {
-      if (this == &obj)
-        return 0;
-      else if (this < &obj)
-        return -1;
-      else
-        return 1;
-    }
+            return is_equal(that);
+        }
 
-    virtual string to_string() const {
-      return string("string rep of the object");
-    }
+        friend bool operator ==(const object& lhs, 
+                               const object& rhs) {
+            if (typeid(lhs) != typeid(rhs))
+                return false;
 
-  public :
+            if (&lhs == &rhs)
+                return true;
+      
+            return (lhs.cmp(rhs) == 0);
+        }
 
-    operator string() const {
-      return to_string();
-    }
+        friend bool operator !=(const object& lhs, 
+                               const object& rhs) {
+            if (typeid(lhs) != typeid(rhs))
+                return false;
 
-    friend int operator ==(const object& lhs, 
-                           const object& rhs) {
-      if (typeid(lhs) != typeid(rhs))
-        return false;
-
-      return (lhs.cmp(rhs) == 0);
-    }
-
-    friend int operator !=(const object& lhs, 
-                           const object& rhs) {
-      if (typeid(lhs) != typeid(rhs))
-        return true;
-
-      return (lhs.cmp(rhs) != 0);
-    }
+            if (&lhs != &rhs)
+                return true;
+ 
+            return (lhs.cmp(rhs) != 0);
+        }
          
-    friend int operator <=(const object& lhs, 
-                           const object& rhs) {
-      if (typeid(lhs) != typeid(rhs))
-        return false;
+        friend bool operator <=(const object& lhs, 
+                                const object& rhs) {
+            if (typeid(lhs) != typeid(rhs))
+                return false;
 
-      return !(lhs.cmp(rhs) > 0);
-    }
+            if (&lhs == &rhs)
+                return true;
+      
+            return !(lhs.cmp(rhs) > 0);
+        }
 
-    friend int operator >=(const object& lhs, 
-                           const object& rhs) {
-      if (typeid(lhs) != typeid(rhs))
-        return false;
+        friend bool operator >=(const object& lhs,
+                               const object& rhs) {
+            if (typeid(lhs) != typeid(rhs))
+                return false;
 
-      return !(lhs.cmp(rhs) < 0);
-    }
+            if (&lhs == &rhs)
+                return true;
+      
+            return !(lhs.cmp(rhs) < 0);
+        }
 
-    friend int operator >(const object& lhs, 
-                          const object& rhs) {
-      if (typeid(lhs) != typeid(rhs))
-        return false;
+        friend bool operator >(const object& lhs, 
+                              const object& rhs) {
+            if (typeid(lhs) != typeid(rhs))
+                return false;
 
-      return (lhs.cmp(rhs) > 0);
-    }
+            if (&lhs == &rhs)
+                return false;
+      
+            return (lhs.cmp(rhs) > 0);
+        }
 
-    friend int operator <(const object& lhs, 
-                          const object& rhs) {
-      if (typeid(lhs) != typeid(rhs))
-        return false;
+        friend bool operator <(const object& lhs, 
+                               const object& rhs) {
 
-      return (lhs.cmp(rhs) < 0);
-    }
+            if (typeid(lhs) != typeid(rhs))
+                return false;
+
+            if (&lhs == &rhs)
+                return false;
+      
+            return (lhs.cmp(rhs) < 0);
+        }
+
+    protected :
+        object() {}
+        virtual ~object() {}
+
+        virtual int cmp(const object& obj) const {
+            if (this == &obj)
+                return 0;
+            else if (this < &obj)
+                return -1;
+            else
+                return 1;
+        }
+
+        virtual bool is_equal(const object& obj) const {
+            return false;
+        }
+
+        virtual string to_string() const {
+            return string("string rep of the object");
+        }
 };
 
 } /* com */
