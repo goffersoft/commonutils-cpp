@@ -24,6 +24,7 @@
 #include "utils.h"
 
 using com::goffersoft::core::utils;
+using std::ostream;
 
 template<>
 bool utils::cmp_equal<float> (
@@ -47,4 +48,40 @@ bool utils::cmp_equal<long double> (
         const long double& rhs,
         const long double epsilon) {
     return equal_xfld(lhs, rhs, epsilon);
+}
+
+template<>
+int utils::cmp<float> (
+        const float& lhs,
+        const float& rhs,
+        const float epsilon) {
+    return cmp_xfld(lhs, rhs, epsilon);
+}
+
+template<>
+int utils::cmp<double> (
+        const double& lhs,
+        const double& rhs,
+        const double epsilon) {
+    return cmp_xfld(lhs, rhs, epsilon);
+}
+
+template<>
+int utils::cmp<long double> (
+        const long double& lhs,
+        const long double& rhs,
+        const long double epsilon) {
+    return cmp_xfld(lhs, rhs, epsilon);
+}
+
+template <>
+ostream& utils::print_data<uint8_t>(ostream& os,
+                                    const uint8_t& t) {
+    return os << static_cast<unsigned>(t);
+}
+
+template <>
+ostream& utils::print_data<int8_t>(ostream& os,
+                                   const int8_t& t) {
+    return os << static_cast<int>(t);
 }

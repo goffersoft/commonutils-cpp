@@ -34,6 +34,7 @@ namespace com {
 namespace goffersoft {
 namespace core {
 
+using std::ostream;
 using std::shared_ptr;
 using std::is_integral;
 using std::is_unsigned;
@@ -47,6 +48,11 @@ using std::isinf;
 class utils {
     public :
         utils() = delete;
+
+        template <typename T>
+        static ostream& print_data(ostream& os, const T& t) {
+            return os << t;
+        }
 
         static bool strequals_igncase(unsigned char a,
                                       unsigned char b) {
@@ -73,24 +79,68 @@ class utils {
                        return tmp;
                    };
         }
+        
+        // -1 ==> lns < rhs 
+        // 1 ==> lns > rhs 
+        // 0 ==> lns == rhs 
+        // -2 if lhs or rhs is nan ==> isnan()
+        // if lhs or rhs is inf ==> isinf()
+        // -1 if lhs is -inf
+        // 1 if lhs is -inf
+        // 1 if rhs is -inf
+        // -1 if rhs is inf
+        template<typename T>
+        static int cmp_xfld(const T& lhs,
+                            const T& rhs,
+                            const T epsilon = numeric_limits<T>::epsilon()) {
+            static_assert(is_floating_point<T>::value,
+                          "T must be one of float, double or long double");
+
+            if( isnan(lhs) && isnan(rhs) ) {
+                return 0; 
+            } else if( isinf(lhs) && isinf(rhs) ) {
+                if(lhs == rhs) {
+                    return 0;
+                } else if (lhs < rhs) {
+                    return -1;
+                } else if (lhs > rhs) {
+                    return 1;
+                }
+            } else if(isnan(lhs) || isnan(rhs)) {
+                return -2;
+            } else {
+                if(isinf(lhs)) {
+                    if(lhs == std::numeric_limits<T>::infinity()) {
+                        return 1;
+                    } else { // -inf
+                        return -1;
+                    }
+                }
+                if(isinf(rhs)) {
+                    if(rhs == std::numeric_limits<T>::infinity()) {
+                        return -1;
+                    } else { // -inf
+                        return 1;
+                    }
+                }
+            }
+
+            const T diff = (lhs - rhs);
+
+            if((diff >= -epsilon) && (diff <= epsilon)) {
+                return 0;
+            } else if (diff < 0) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
 
         template<typename T>
         static bool equal_xfld(const T& lhs,
                                const T& rhs,
                                const T epsilon = numeric_limits<T>::epsilon()) {
-            static_assert(is_floating_point<T>::value,
-                          "T must be one of float, double or long double");
-            if( isnan(lhs) && isnan(rhs) )
-                return true; 
-            else if( isinf(lhs) && isinf(rhs) )
-                return true;
-            else if(isinf(lhs) || isinf(rhs) ||
-                    isnan(lhs) || isnan(rhs))
-                return false;
-
-            const T diff = (lhs - rhs);
-
-            return ((diff >= -epsilon) && (diff <= epsilon));
+            return (cmp_xfld(lhs, rhs, epsilon) == 0)?true:false;
         }
 
         template<typename T>
@@ -100,8 +150,29 @@ class utils {
             return (lhs == rhs);
         }
 
+        // -1 ==> lns < rhs 
+        // 1 ==> lns > rhs 
+        // 0 ==> lns == rhs 
+        template<typename T>
+        static int cmp(const T& lhs,
+                       const T& rhs,
+                       const T epsilon = numeric_limits<T>::epsilon()) {
+            if(lhs == rhs) {
+                return 0;
+            } else if(lhs < rhs) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
 };
+template <>
+ostream& utils::print_data<uint8_t>(ostream& os,
+                                    const uint8_t& t);
 
+template <>
+ostream& utils::print_data<int8_t>(ostream& os,
+                                    const int8_t& t);
 
 template<>
 bool utils::cmp_equal<float> (
@@ -117,6 +188,24 @@ bool utils::cmp_equal<double> (
 
 template<>
 bool utils::cmp_equal<long double> (
+        const long double& lhs,
+        const long double& rhs,
+        const long double epsilonn);
+
+template<>
+int utils::cmp<float> (
+        const float& lhs,
+        const float& rhs,
+        const float epsilon);
+
+template<>
+int utils::cmp<double> (
+        const double& lhs,
+        const double& rhs,
+        const double epsilon);
+
+template<>
+int utils::cmp<long double> (
         const long double& lhs,
         const long double& rhs,
         const long double epsilonn);
