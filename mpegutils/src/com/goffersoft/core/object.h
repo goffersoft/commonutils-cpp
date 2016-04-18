@@ -114,6 +114,10 @@ class object {
             return (lhs.cmp(rhs) < 0);
         }
 
+        virtual size_t hash_code() const {
+            return size_t(this);
+        }
+
     protected :
         object() {}
         virtual ~object() {}

@@ -126,7 +126,6 @@ class utils {
             }
 
             const T diff = (lhs - rhs);
-
             if((diff >= -epsilon) && (diff <= epsilon)) {
                 return 0;
             } else if (diff < 0) {
@@ -160,6 +159,30 @@ class utils {
             if(lhs == rhs) {
                 return 0;
             } else if(lhs < rhs) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
+        template<typename T1, typename T2>
+        static int32_t cmp(const T1& this_first,
+                           const T2& this_second,
+                           const T1& that_first,
+                           const T2& that_second) {
+            int32_t cmp_first = cmp(this_first, that_first);
+    
+            if(cmp_first == 0) {
+                int32_t cmp_second = cmp(this_second, that_second);
+
+                if(cmp_second == 0) {
+                    return 0;
+                } else if(cmp_second < 0) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            } else if(cmp_first < 0) {
                 return -1;
             } else {
                 return 1;
