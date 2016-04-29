@@ -32,7 +32,6 @@ namespace core {
 
 class object {
     public :
-
         operator string() const {
           return to_string();
         }
@@ -46,38 +45,89 @@ class object {
 
             return is_equal(that);
         }
+         
+        bool operator ==(const object& that) const {
+            if (typeid(*this) != typeid(that))
+                return false;
 
-        friend bool operator ==(const object& lhs, 
+            if (this == &that)
+                return true;
+      
+            return (this->cmp(that) == 0);
+        }
+
+        bool operator !=(const object& that) const {
+            if (typeid(*this) != typeid(that))
+                return false;
+
+            if (this == &that)
+                return false;
+ 
+            return (this->cmp(that) != 0);
+        }
+
+        bool operator <=(const object& that) const {
+            if (typeid(*this) != typeid(that))
+                return false;
+
+            if (this == &that)
+                return true;
+      
+            return (this->cmp(that) <= 0);
+        }
+
+        bool operator >=(const object& that) const {
+            if (typeid(*this) != typeid(that))
+                return false;
+
+            if (this == &that)
+                return true;
+      
+            return (this->cmp(that) >= 0);
+        }
+
+        bool operator <(const object& that) const {
+            if (typeid(*this) != typeid(that))
+                return false;
+
+            if (this == &that)
+                return false;
+      
+            return (this->cmp(that) < 0);
+        }
+
+        bool operator >(const object& that) const {
+            if (typeid(*this) != typeid(that))
+                return false;
+
+            if (this == &that)
+                return false;
+      
+            return (this->cmp(that) > 0);
+        }
+
+/*        friend bool operator ==(const object& lhs, 
                                const object& rhs) {
             if (typeid(lhs) != typeid(rhs))
                 return false;
 
-            if (&lhs == &rhs)
-                return true;
-      
-            return (lhs.cmp(rhs) == 0);
-        }
+            return lhs.operator ==(rhs);
 
+        }
         friend bool operator !=(const object& lhs, 
                                const object& rhs) {
             if (typeid(lhs) != typeid(rhs))
                 return false;
 
-            if (&lhs != &rhs)
-                return true;
- 
-            return (lhs.cmp(rhs) != 0);
+            return lhs.operator !=(rhs);
         }
-         
+
         friend bool operator <=(const object& lhs, 
                                 const object& rhs) {
             if (typeid(lhs) != typeid(rhs))
                 return false;
 
-            if (&lhs == &rhs)
-                return true;
-      
-            return !(lhs.cmp(rhs) > 0);
+            return lhs.operator <=(rhs);
         }
 
         friend bool operator >=(const object& lhs,
@@ -85,21 +135,7 @@ class object {
             if (typeid(lhs) != typeid(rhs))
                 return false;
 
-            if (&lhs == &rhs)
-                return true;
-      
-            return !(lhs.cmp(rhs) < 0);
-        }
-
-        friend bool operator >(const object& lhs, 
-                              const object& rhs) {
-            if (typeid(lhs) != typeid(rhs))
-                return false;
-
-            if (&lhs == &rhs)
-                return false;
-      
-            return (lhs.cmp(rhs) > 0);
+            return lhs.operator >=(rhs);
         }
 
         friend bool operator <(const object& lhs, 
@@ -108,11 +144,16 @@ class object {
             if (typeid(lhs) != typeid(rhs))
                 return false;
 
-            if (&lhs == &rhs)
-                return false;
-      
-            return (lhs.cmp(rhs) < 0);
+            return lhs.operator <(rhs);
         }
+
+        friend bool operator >(const object& lhs, 
+                              const object& rhs) {
+            if (typeid(lhs) != typeid(rhs))
+                return false;
+
+            return lhs.operator >(rhs);
+        }*/
 
         virtual size_t hash_code() const {
             return size_t(this);
