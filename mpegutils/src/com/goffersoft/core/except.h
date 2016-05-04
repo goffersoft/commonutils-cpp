@@ -22,8 +22,8 @@
 #ifndef __EXCEPT_H__
 #define __EXCEPT_H__
 
-#include<exception>
-#include<string>
+#include <exception>
+#include <string>
 
 namespace com {
 namespace goffersoft {
