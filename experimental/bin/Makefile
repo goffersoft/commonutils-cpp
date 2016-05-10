@@ -3,7 +3,11 @@
 LIBS = $(shell ls $(LIBDIR))
 LOCALLIBS := $(addprefix $(LIBDIR)/, $(LIBS))
 EXENAME = $(EXE)
+ifdef INCLUDE_BOOST
 EXTLDFLAGS = -L$(EXTDIR)/$(BOOSTDIRNAME)/stage/lib
+else
+EXTLDFLAGS =
+endif
 LDFLAGS = $(INCFLAGS) -L$(LIBDIR) $(EXTLDFLAGS)
 
 ifeq "$(LIBTYPE)" "$(LIBTYPE_AR)"

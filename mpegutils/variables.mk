@@ -10,9 +10,8 @@ export PLATFORM_MAC = __OS_MAC__
 export PLATFORM_OS = $(PLATFORM_LINUX)
 #export PLATFORM_OS = $(PLATFORM_MAC)
 
-export INCLUDE_BOOST = 1
+#export INCLUDE_BOOST = 1
 export BOOSTDIRNAME = boost_1_57_0
-
 
 export MAKETYPE_RECURSE = RECURSE
 export MAKETYPE_NORECURSE = NORECURSE
@@ -40,7 +39,7 @@ export SRCDIR = $(BASEDIR)/$(SRCDIRNAME)
 export INCDIR = $(BASEDIR)/$(INCLUDEDIRNAME)
 export BINDIR = $(BASEDIR)/$(BINDIRNAME)
 export LIBDIR = $(BASEDIR)/$(LIBDIRNAME)
-export EXTDIR = $(BASEDIR)/../$(EXTDIRNAME)
+export EXTDIR = $(BASEDIR)/$(EXTDIRNAME)
 export EXTLOCALDIR = $(BASEDIR)/$(EXTDIRNAME)
 ifeq ($(findstring $(SRCDIRNAME), $(shell pwd)), $(SRCDIRNAME))
 export OBJDIR = $(subst $(SRCDIRNAME),$(OBJDIRNAME)/$(SRCDIRNAME),$(shell pwd))
@@ -65,13 +64,21 @@ export MKDIR = @mkdir -p
 export CC = gcc
 export AR = ar
 
-export EXTINCFLAGS = -I$(EXTDIR)/$(BOOSTDIRNAME)
+ifdef INCLUDE_BOOST
+export BOOSTFLAGS = -DBOOST_LOG_DYN_LINK
+export BOOSTINCFLAGS = -I$(EXTDIR)/$(BOOSTDIRNAME)
+else
+export BOOSTFLAGS =
+export BOOSTINCFLAGS =
+endif
+
+export EXTINCFLAGS = $(BOOSTINCFLAGS)
 export INCFLAGS ?= -I$(INCDIR) \
                    $(addprefix -I$(SRCDIR),$(subst $(SRCDIR), \
                      ,${shell find ${SRCDIR} -type d -print})) \
                    $(EXTINCFLAGS)
 
-export CCFLAGS = -Wall $(INCFLAGS) -D$(PLATFORM_OS) -DBOOST_LOG_DYN_LINK -std=c++11
+export CCFLAGS = -Wall $(INCFLAGS) -D$(PLATFORM_OS) $(BOOSTFLAGS) -std=c++11
 export SOCFLAGS = -fPIC
 export SOCPPFLAGS = -fPIC
 export ARCFLAGS = 
