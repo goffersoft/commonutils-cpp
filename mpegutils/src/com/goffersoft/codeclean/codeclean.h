@@ -1,19 +1,19 @@
 /** 
  **
- ** This file is part of mpegutils.
+ ** This file is part of mepgutils.
  **
- ** mpegutils is free software: you can redistribute it and/or modify
+ ** mepgutils is free software: you can redistribute it and/or modify
  ** it under the terms of the GNU General Public License as published by
  ** the Free Software Foundation, either version 3 of the License, or
  ** (at your option) any later version.
  **
- ** mpegutils is distributed in the hope that it will be useful,
+ ** mepgutils is distributed in the hope that it will be useful,
  ** but WITHOUT ANY WARRANTY; without even the implied warranty of
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU General Public License for more details.
  **
  ** You should have received a copy of the GNU General Public License
- ** along with mpegutils. If not, see <http://www.gnu.org/licenses/>.
+ ** along with mepgutils. If not, see <http://www.gnu.org/licenses/>.
  **
  ** this file describes the classes that are used for implementing a
  ** unit test framework
@@ -226,7 +226,9 @@ class test {
                  const string& pass_msg = "test_passed") {
             bool retval;
 
-            retval = equal(begin(actual), end(actual), begin(expected), cfunc);
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected),
+                           cfunc);
 
             return analyze_array_result(retval, expected, actual,
                                         os, pass_msg, fail_msg);
@@ -246,7 +248,8 @@ class test {
 
             bool retval;
 
-            retval = equal(begin(actual), end(actual), begin(expected));
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected));
 
             return analyze_array_result(retval, expected, actual,
                                         os, pass_msg, fail_msg);
@@ -266,9 +269,8 @@ class test {
                "A::value_type must be one of "
                "float, double or long double");
 
-            retval = equal(begin(actual),
-                           end(actual),
-                           begin(expected),
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected),
                            [](const typename A::value_type& lhs,
                               const typename A::value_type& rhs) {
                                return utils::cmp_equal(lhs, rhs);
@@ -288,7 +290,9 @@ class test {
                  const string& pass_msg = "test_passed") {
             bool retval;
 
-            retval = equal(begin(actual), end(actual), begin(expected), cfunc);
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected),
+                           cfunc);
 
             return analyze_array_result(!retval, expected, actual,
                                         os, pass_msg, fail_msg);
@@ -308,7 +312,8 @@ class test {
 
             bool retval;
 
-            retval = equal(begin(actual), end(actual), begin(expected));
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected));
 
             return analyze_array_result(!retval, expected, actual,
                                         os, pass_msg, fail_msg);
@@ -329,9 +334,8 @@ class test {
 
             bool retval;
 
-            retval = equal(begin(actual),
-                           end(actual),
-                           begin(expected),
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected),
                            [](const typename A::value_type& lhs,
                               const typename A::value_type& rhs) {
                                return utils::cmp_equal(lhs, rhs);
@@ -452,8 +456,7 @@ class test {
                 }
                 os << endl;
 
-                os << ws_ts_prefix << msg << endl
-                   << ws_r_prefix
+                os << ws_r_prefix
                    << "actual: "<< endl
                    << ws_r_prefix;
 

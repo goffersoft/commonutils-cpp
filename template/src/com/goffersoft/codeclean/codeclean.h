@@ -226,7 +226,9 @@ class test {
                  const string& pass_msg = "test_passed") {
             bool retval;
 
-            retval = equal(begin(actual), end(actual), begin(expected), cfunc);
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected),
+                           cfunc);
 
             return analyze_array_result(retval, expected, actual,
                                         os, pass_msg, fail_msg);
@@ -246,7 +248,8 @@ class test {
 
             bool retval;
 
-            retval = equal(begin(actual), end(actual), begin(expected));
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected));
 
             return analyze_array_result(retval, expected, actual,
                                         os, pass_msg, fail_msg);
@@ -266,9 +269,8 @@ class test {
                "A::value_type must be one of "
                "float, double or long double");
 
-            retval = equal(begin(actual),
-                           end(actual),
-                           begin(expected),
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected),
                            [](const typename A::value_type& lhs,
                               const typename A::value_type& rhs) {
                                return utils::cmp_equal(lhs, rhs);
@@ -288,7 +290,9 @@ class test {
                  const string& pass_msg = "test_passed") {
             bool retval;
 
-            retval = equal(begin(actual), end(actual), begin(expected), cfunc);
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected),
+                           cfunc);
 
             return analyze_array_result(!retval, expected, actual,
                                         os, pass_msg, fail_msg);
@@ -308,7 +312,8 @@ class test {
 
             bool retval;
 
-            retval = equal(begin(actual), end(actual), begin(expected));
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected));
 
             return analyze_array_result(!retval, expected, actual,
                                         os, pass_msg, fail_msg);
@@ -329,9 +334,8 @@ class test {
 
             bool retval;
 
-            retval = equal(begin(actual),
-                           end(actual),
-                           begin(expected),
+            retval = equal(begin(actual), end(actual),
+                           begin(expected), end(expected),
                            [](const typename A::value_type& lhs,
                               const typename A::value_type& rhs) {
                                return utils::cmp_equal(lhs, rhs);
@@ -452,8 +456,7 @@ class test {
                 }
                 os << endl;
 
-                os << ws_ts_prefix << msg << endl
-                   << ws_r_prefix
+                os << ws_r_prefix
                    << "actual: "<< endl
                    << ws_r_prefix;
 
