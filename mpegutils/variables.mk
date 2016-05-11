@@ -78,7 +78,7 @@ export INCFLAGS ?= -I$(INCDIR) \
                      ,${shell find ${SRCDIR} -type d -print})) \
                    $(EXTINCFLAGS)
 
-export CCFLAGS = -Wall $(INCFLAGS) -D$(PLATFORM_OS) $(BOOSTFLAGS) -std=c++11
+export CCFLAGS = -Wall $(INCFLAGS) -D$(PLATFORM_OS) $(BOOSTFLAGS) -std=c++14
 export SOCFLAGS = -fPIC
 export SOCPPFLAGS = -fPIC
 export ARCFLAGS = 
